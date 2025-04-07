@@ -23,8 +23,14 @@ func update_deck_display() -> void:
 # Main function to draw a card from the deck
 func draw_card() -> void:
 	# Safety check: don't try to draw from an empty deck
-	if player_deck.size() == 0 or $"../PlayerHand".player_hand.size() >= 10:
+	if $"../PlayerHand".player_hand.size() >= 10:
 		return
+	
+	if player_deck.size() == 0:
+		await move_discard_to_draw()
+		
+		if player_deck.size() == 0:
+			return
 	
 	# Take the first card from the deck
 	var card_drawn = player_deck[0]
@@ -66,3 +72,91 @@ func spawn_card() -> void:
 	
 	# Add the card to the player's hand with animation
 	$"../PlayerHand".add_card_to_hand(new_card, CARD_DRAW_SPEED)
+
+func move_discard_to_draw() -> void:
+	# Animation constants
+	const ANIMATION_DURATION = 0.4
+	const CARD_OFFSET = 0.03  # Small time offset between cards
+	const ARC_HEIGHT = -250    # Height of the parabolic arc
+	
+	# Get positions for animation
+	var discard_position = $"../Discard".global_position
+	var deck_position = global_position
+	
+	# Store the number of cards to animate
+	var card_count = $"../Discard".discard_pile.size()
+	if card_count == 0:
+		return
+	
+	# Create and setup all card visuals at once - initially stacked perfectly
+	var card_visuals = []
+	for i in card_count:
+		var card_visual = Sprite2D.new()
+		add_child(card_visual)
+		
+		# All cards start at exactly the same position (perfect stack)
+		card_visual.texture = load("res://assets/gold-card.png")
+		card_visual.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		card_visual.global_position = discard_position
+		card_visual.self_modulate.a = 0.7
+		card_visual.z_index = card_count - i  # Stack order (highest z_index on top)
+		
+		card_visuals.append(card_visual)
+	
+	# First animate cards slightly apart to create the "fanning" effect
+	for i in card_count:
+		var fan_offset = Vector2(i * 1.5, i * 0.5)  # Subtle offset for fanning
+		var tween = create_tween()
+		tween.tween_property(card_visuals[i], "global_position", 
+							discard_position + fan_offset, 0.2)
+	
+	# Wait for the fanning animation to complete
+	await get_tree().create_timer(0.2).timeout
+	
+	# Move all cards from discard to deck array
+	while $"../Discard".discard_pile.size() > 0:
+		player_deck.append($"../Discard".discard_pile.pop_back())
+	
+	# Update displays
+	$"../Discard".update_discard_display()
+	update_deck_display()
+	
+	# Animate cards along smooth arc path
+	for i in card_count:
+		var start_pos = card_visuals[i].global_position
+		var end_pos = deck_position
+		var control_point = Vector2(
+			(start_pos.x + end_pos.x) / 2,
+			min(start_pos.y, end_pos.y) - ARC_HEIGHT
+		)
+		
+		# Create tween for smooth bezier curve motion
+		var tween = create_tween()
+		tween.set_trans(Tween.TRANS_QUAD)
+		tween.set_ease(Tween.EASE_IN_OUT)
+		
+		# Use custom method to move along a quadratic bezier curve
+		tween.tween_method(
+			func(t: float):
+				# Quadratic Bezier formula: (1-t)²P₀ + 2(1-t)tP₁ + t²P₂
+				var one_minus_t = 1.0 - t
+				card_visuals[i].global_position = one_minus_t * one_minus_t * start_pos + \
+										2 * one_minus_t * t * control_point + \
+										t * t * end_pos,
+			0.0,  # Start progress
+			1.0,  # End progress
+			ANIMATION_DURATION
+		).set_delay(i * CARD_OFFSET)
+		
+		# Fade out at the end
+		tween.tween_property(card_visuals[i], "modulate:a", 0, 0.15)
+	
+	# Wait for the last card animation to complete
+	await get_tree().create_timer(ANIMATION_DURATION + (card_count * CARD_OFFSET) + 0.2).timeout
+	
+	# Remove all the temporary visuals
+	for card_visual in card_visuals:
+		card_visual.queue_free()
+	
+	# Shuffle the deck
+	player_deck.shuffle()

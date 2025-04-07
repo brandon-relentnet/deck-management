@@ -76,7 +76,6 @@ func move_card_to_discard(card) -> void:
 	$"../Discard".update_discard_display()
 	await get_tree().create_timer(DEFAULT_CARD_MOVE_SPEED).timeout
 	remove_child(card)
-	print($"../Discard".discard_pile)
 	
 func move_hand_to_discard() -> void:
 	player_hand_reference.player_hand.reverse()
@@ -175,7 +174,9 @@ func get_card_with_highest_z_index(cards: Array) -> Node2D:
 
 func _on_turn_manager_pressed() -> void:
 	$"../Deck".currently_drawing_a_card = true
-	# Move hand to discard pile
-	move_hand_to_discard()
-	await get_tree().create_timer(DEFAULT_CARD_MOVE_SPEED * 10).timeout
+	var player_hand_size = player_hand_reference.player_hand.size()
+	if player_hand_size > 0:
+		# Move hand to discard pile
+		move_hand_to_discard()
+	await get_tree().create_timer(DEFAULT_CARD_MOVE_SPEED * player_hand_size).timeout
 	$"../Deck".draw_hand(5)

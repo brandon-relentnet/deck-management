@@ -6,7 +6,7 @@
 [ext_resource type="PackedScene" uid="uid://blkw2nye87d4a" path="res://scenes/deck.tscn" id="4_lquwl"]
 [ext_resource type="Script" uid="uid://dtcece7lyqaaa" path="res://scripts/input_manager.gd" id="6_7mycd"]
 [ext_resource type="PackedScene" uid="uid://csw2g32wfd03q" path="res://scenes/discard.tscn" id="6_272bh"]
-[ext_resource type="Script" uid="uid://b654gecfuc454" path="res://turn_manager.gd" id="7_272bh"]
+[ext_resource type="Script" uid="uid://b654gecfuc454" path="res://scripts/turn_manager.gd" id="7_272bh"]
 
 [sub_resource type="Gradient" id="Gradient_7mycd"]
 colors = PackedColorArray(0.564706, 0.364706, 1, 1, 1, 0.552941, 1, 1)
