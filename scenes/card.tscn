@@ -1,0 +1,25 @@
+[gd_scene load_steps=4 format=3 uid="uid://dxibv7tmb4iv3"]
+
+[ext_resource type="Texture2D" uid="uid://c6r6htbajqurw" path="res://assets/gold-card.png" id="1_kikvd"]
+[ext_resource type="Script" uid="uid://lym5407t0oi3" path="res://scripts/card.gd" id="1_rjlel"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_rjlel"]
+size = Vector2(80, 160)
+
+[node name="Card" type="Node2D"]
+position = Vector2(150, 890)
+script = ExtResource("1_rjlel")
+
+[node name="CardImage" type="Sprite2D" parent="."]
+texture_filter = 1
+position = Vector2(0.00012207, 6.10352e-05)
+scale = Vector2(2.5, 2.5)
+texture = ExtResource("1_kikvd")
+
+[node name="Area2D" type="Area2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+shape = SubResource("RectangleShape2D_rjlel")
+
+[connection signal="mouse_entered" from="Area2D" to="." method="_on_area_2d_mouse_entered"]
+[connection signal="mouse_exited" from="Area2D" to="." method="_on_area_2d_mouse_exited"]
