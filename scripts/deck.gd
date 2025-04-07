@@ -3,6 +3,7 @@ extends Node2D
 # Constants for card creation and animation
 const CARD_SCENE_PATH = "res://scenes/card.tscn"  # Path to the card scene file
 const CARD_DRAW_SPEED = 0.1                   # Animation speed when drawing a card
+const CURRENT_HAND_DRAW = 10
 
 # Deck contents - the cards available to draw
 var player_deck = [
@@ -31,7 +32,7 @@ var currently_drawing_a_card: bool = false
 
 # Called when the node enters the scene tree
 func _ready() -> void:
-	draw_hand(5)
+	draw_hand(CURRENT_HAND_DRAW)
 	# Initialize the deck counter display
 	update_deck_display()
 
@@ -42,7 +43,7 @@ func update_deck_display() -> void:
 # Main function to draw a card from the deck
 func draw_card() -> void:
 	# Safety check: don't try to draw from an empty deck or if hand is full
-	if $"../PlayerHand".player_hand.size() >= 10:
+	if $"../PlayerHand".player_hand.size() >= 8:
 		return
 	
 	# Check if deck is empty and needs to refresh from discard

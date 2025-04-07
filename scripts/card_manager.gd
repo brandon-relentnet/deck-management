@@ -217,6 +217,6 @@ func _on_turn_manager_pressed() -> void:
 		await create_timer(DEFAULT_CARD_MOVE_SPEED * player_hand_size)
 	
 	# Draw new hand and reset energy
-	$"../Deck".draw_hand(5)
+	$"../Deck".draw_hand($"../Deck".CURRENT_HAND_DRAW)
 	turn_manager.player_energy = 3
 	turn_manager.update_player_energy_label()
