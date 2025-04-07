@@ -1,10 +1,10 @@
 [gd_scene load_steps=4 format=3 uid="uid://dxibv7tmb4iv3"]
 
-[ext_resource type="Texture2D" uid="uid://c6r6htbajqurw" path="res://assets/gold-card.png" id="1_kikvd"]
 [ext_resource type="Script" uid="uid://lym5407t0oi3" path="res://scripts/card.gd" id="1_rjlel"]
+[ext_resource type="Texture2D" uid="uid://b8vppoupuycxn" path="res://assets/red-card-front.png" id="2_6u4wf"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_rjlel"]
-size = Vector2(80, 160)
+size = Vector2(160, 240)
 
 [node name="Card" type="Node2D"]
 position = Vector2(150, 890)
@@ -14,7 +14,7 @@ script = ExtResource("1_rjlel")
 texture_filter = 1
 position = Vector2(0.00012207, 6.10352e-05)
 scale = Vector2(2.5, 2.5)
-texture = ExtResource("1_kikvd")
+texture = ExtResource("2_6u4wf")
 
 [node name="Area2D" type="Area2D" parent="."]
 
@@ -22,11 +22,13 @@ texture = ExtResource("1_kikvd")
 shape = SubResource("RectangleShape2D_rjlel")
 
 [node name="EnergyLabel" type="RichTextLabel" parent="."]
-offset_left = -31.0
-offset_top = -56.0
-offset_right = 32.0
-offset_bottom = 32.0
-theme_override_font_sizes/normal_font_size = 64
+offset_left = 37.0
+offset_top = -73.0
+offset_right = 68.0
+offset_bottom = -47.0
+theme_override_colors/table_even_row_bg = Color(0.713726, 0, 0, 1)
+theme_override_colors/table_odd_row_bg = Color(0.662745, 0, 0, 1)
+theme_override_font_sizes/normal_font_size = 16
 text = "0"
 horizontal_alignment = 1
 

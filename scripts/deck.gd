@@ -2,7 +2,7 @@ extends Node2D
 
 # Constants for card creation and animation
 const CARD_SCENE_PATH = "res://scenes/card.tscn"  # Path to the card scene file
-const CARD_DRAW_SPEED = 0.25                      # Animation speed when drawing a card
+const CARD_DRAW_SPEED = 0.1                   # Animation speed when drawing a card
 
 # Deck contents - the cards available to draw
 var player_deck = [
@@ -142,7 +142,7 @@ func move_discard_to_draw() -> void:
 		add_child(card_visual)
 		
 		# All cards start at exactly the same position (perfect stack)
-		card_visual.texture = load("res://assets/gold-card.png")
+		card_visual.texture = load("res://assets/red-card-back.png")
 		card_visual.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 		card_visual.global_position = discard_position
 		card_visual.self_modulate.a = 0.7

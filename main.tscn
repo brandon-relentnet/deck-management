@@ -6,7 +6,7 @@
 [ext_resource type="PackedScene" uid="uid://blkw2nye87d4a" path="res://scenes/deck.tscn" id="4_lquwl"]
 [ext_resource type="Script" uid="uid://dtcece7lyqaaa" path="res://scripts/input_manager.gd" id="6_7mycd"]
 [ext_resource type="PackedScene" uid="uid://csw2g32wfd03q" path="res://scenes/discard.tscn" id="6_272bh"]
-[ext_resource type="Script" uid="uid://b654gecfuc454" path="res://scripts/turn_manager.gd" id="7_272bh"]
+[ext_resource type="PackedScene" uid="uid://ddd4e4gfmyeeh" path="res://scenes/turn_manager.tscn" id="7_272bh"]
 
 [sub_resource type="Gradient" id="Gradient_7mycd"]
 colors = PackedColorArray(0.564706, 0.364706, 1, 1, 1, 0.552941, 1, 1)
@@ -44,22 +44,6 @@ script = ExtResource("6_7mycd")
 [node name="Discard" parent="." instance=ExtResource("6_272bh")]
 position = Vector2(1770, 890)
 
-[node name="TurnManager" type="Button" parent="."]
-offset_left = 1702.0
-offset_top = 674.0
-offset_right = 1836.0
-offset_bottom = 731.0
-text = "End Turn"
-script = ExtResource("7_272bh")
-
-[node name="RichTextLabel" type="RichTextLabel" parent="TurnManager"]
-layout_mode = 0
-offset_left = 14.0
-offset_top = -115.0
-offset_right = 128.0
-offset_bottom = -20.0
-theme_override_font_sizes/normal_font_size = 64
-text = "3"
-horizontal_alignment = 1
+[node name="TurnManager" parent="." instance=ExtResource("7_272bh")]
 
 [connection signal="pressed" from="TurnManager" to="CardManager" method="_on_turn_manager_pressed"]

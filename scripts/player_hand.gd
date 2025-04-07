@@ -1,7 +1,7 @@
 extends Node2D
 
 # Constants for hand layout and animation
-const CARD_WIDTH = 100                # Horizontal spacing between cards in hand
+const CARD_WIDTH = 170                # Horizontal spacing between cards in hand
 const HAND_Y_POSITION = 890           # Vertical position of the player's hand
 const DEFAULT_CARD_MOVE_SPEED = 0.1   # Default speed for card movement animations
 
