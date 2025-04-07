@@ -4,6 +4,7 @@ extends Node2D
 const COLLISION_MASK_CARD = 1      # Used for detecting cards
 const COLLISION_MASK_CARD_SLOT = 2 # Used for detecting card slots
 const DEFAULT_CARD_MOVE_SPEED = 0.1 # Default animation speed for card movement
+const DISCARD_PILE_POSITION = Vector2(1770, 890)
 
 # State variables
 var card_being_dragged: Node2D = null  # Reference to the card currently being dragged
@@ -49,19 +50,33 @@ func finish_drag() -> void:
 	# Check if the card is over a valid card slot
 	var card_slot = raycast_check_for_card_slot()
 	
+	#print(card_slot)
+	
 	if card_slot and not card_slot.card_in_slot:
 		# Place card in slot
 		player_hand_reference.remove_card_from_hand(card_being_dragged)
 		card_being_dragged.position = card_slot.position
+		card_slot.played_card = card_being_dragged
 		# Disable collision to prevent further interaction with placed card
 		card_being_dragged.get_node("Area2D/CollisionShape2D").disabled = true
 		card_slot.card_in_slot = true
+		# Move card from slot to discard pile and allow for more cards to be played
+		move_played_card_to_discard(card_slot.played_card)
+		card_slot.card_in_slot = false
 	else:
 		# Return card to hand if not placed in a slot
 		player_hand_reference.add_card_to_hand(card_being_dragged, DEFAULT_CARD_MOVE_SPEED)
 	
 	# Clear dragging reference
 	card_being_dragged = null
+
+func move_played_card_to_discard(played_card) -> void:
+	$"../PlayerHand".animate_card_to_position(played_card, DISCARD_PILE_POSITION, DEFAULT_CARD_MOVE_SPEED)
+	$"../Discard".discard_pile.append(played_card)
+	$"../Discard".update_discard_display()
+	await get_tree().create_timer(DEFAULT_CARD_MOVE_SPEED).timeout
+	remove_child(played_card)
+	print($"../Discard".discard_pile)
 
 # Connect signals from newly created cards to this manager
 func connect_card_signals(card: Node2D) -> void:

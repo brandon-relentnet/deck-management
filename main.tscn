@@ -1,51 +1,70 @@
-[gd_scene load_steps=8 format=3 uid="uid://bvm1l0sks3mxk"]
+[gd_scene load_steps=11 format=3 uid="uid://bvm1l0sks3mxk"]
 
 [ext_resource type="PackedScene" uid="uid://brakl80fqtkxy" path="res://scenes/card_slot.tscn" id="2_1bvp3"]
 [ext_resource type="Script" uid="uid://l87bixt6uy5b" path="res://scripts/card_manager.gd" id="2_h2yge"]
 [ext_resource type="Script" uid="uid://d21fogr4y6d5n" path="res://scripts/player_hand.gd" id="3_1bvp3"]
-[ext_resource type="Texture2D" uid="uid://22sn0fh6gd41" path="res://assets/deck.png" id="4_1bvp3"]
-[ext_resource type="Script" uid="uid://dq60712ifc7uv" path="res://deck.gd" id="4_lquwl"]
-[ext_resource type="Script" uid="uid://dtcece7lyqaaa" path="res://input_manager.gd" id="6_7mycd"]
+[ext_resource type="PackedScene" uid="uid://blkw2nye87d4a" path="res://scenes/deck.tscn" id="4_lquwl"]
+[ext_resource type="Script" uid="uid://cttm3ew5cgav1" path="res://discard.gd" id="6_5vw27"]
+[ext_resource type="Script" uid="uid://dtcece7lyqaaa" path="res://scripts/input_manager.gd" id="6_7mycd"]
+[ext_resource type="Texture2D" uid="uid://dwyqw58r71nop" path="res://assets/discard.png" id="6_272bh"]
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_lquwl"]
-size = Vector2(32, 64)
+[sub_resource type="Gradient" id="Gradient_7mycd"]
+colors = PackedColorArray(0.564706, 0.364706, 1, 1, 1, 0.552941, 1, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_272bh"]
+gradient = SubResource("Gradient_7mycd")
+width = 1920
+height = 1080
+fill_from = Vector2(0.188073, 0)
+fill_to = Vector2(0.853211, 0.978593)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_5vw27"]
+size = Vector2(80, 160)
 
 [node name="Main" type="Node2D"]
+
+[node name="Background" type="Sprite2D" parent="."]
+z_index = -10
+position = Vector2(960, 540)
+texture = SubResource("GradientTexture2D_272bh")
 
 [node name="CardManager" type="Node2D" parent="."]
 script = ExtResource("2_h2yge")
 
 [node name="CardSlot" parent="." instance=ExtResource("2_1bvp3")]
-position = Vector2(382, 249)
+position = Vector2(975, 428)
 scale = Vector2(2.5, 2.5)
 
 [node name="PlayerHand" type="Node2D" parent="."]
 script = ExtResource("3_1bvp3")
 
-[node name="Deck" type="Node2D" parent="."]
+[node name="Deck" parent="." instance=ExtResource("4_lquwl")]
 position = Vector2(150, 890)
-scale = Vector2(2.5, 2.5)
-script = ExtResource("4_lquwl")
-
-[node name="Sprite2D" type="Sprite2D" parent="Deck"]
-z_index = -2
-texture_filter = 1
-texture = ExtResource("4_1bvp3")
-
-[node name="Area2D" type="Area2D" parent="Deck"]
-collision_layer = 4
-collision_mask = 4
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Deck/Area2D"]
-shape = SubResource("RectangleShape2D_lquwl")
-
-[node name="RichTextLabel" type="RichTextLabel" parent="Deck"]
-z_index = -2
-offset_left = -5.2
-offset_top = -12.0
-offset_right = 20.8
-offset_bottom = 18.0
-text = "0"
 
 [node name="InputManager" type="Node2D" parent="."]
 script = ExtResource("6_7mycd")
+
+[node name="Discard" type="Node2D" parent="."]
+position = Vector2(1770, 890)
+script = ExtResource("6_5vw27")
+
+[node name="Sprite2D" type="Sprite2D" parent="Discard"]
+scale = Vector2(2.5, 2.5)
+texture = ExtResource("6_272bh")
+
+[node name="Area2D" type="Area2D" parent="Discard"]
+collision_layer = 4
+collision_mask = 4
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Discard/Area2D"]
+shape = SubResource("RectangleShape2D_5vw27")
+
+[node name="RichTextLabel" type="RichTextLabel" parent="Discard"]
+offset_left = -28.0
+offset_top = -47.0
+offset_right = 32.0
+offset_bottom = 42.0
+theme_override_colors/default_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/normal_font_size = 64
+text = "0"
+horizontal_alignment = 1
