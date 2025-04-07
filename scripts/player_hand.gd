@@ -55,3 +55,6 @@ func remove_card_from_hand(card: Node2D) -> void:
 		player_hand.erase(card)
 		# Recalculate positions for all remaining cards
 		update_hand_positions(DEFAULT_CARD_MOVE_SPEED)
+		
+func clear_hand() -> void:
+	player_hand.clear()

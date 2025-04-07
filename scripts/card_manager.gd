@@ -61,7 +61,7 @@ func finish_drag() -> void:
 		card_being_dragged.get_node("Area2D/CollisionShape2D").disabled = true
 		card_slot.card_in_slot = true
 		# Move card from slot to discard pile and allow for more cards to be played
-		move_played_card_to_discard(card_slot.played_card)
+		move_card_to_discard(card_slot.played_card)
 		card_slot.card_in_slot = false
 	else:
 		# Return card to hand if not placed in a slot
@@ -70,14 +70,21 @@ func finish_drag() -> void:
 	# Clear dragging reference
 	card_being_dragged = null
 
-func move_played_card_to_discard(played_card) -> void:
-	$"../PlayerHand".animate_card_to_position(played_card, DISCARD_PILE_POSITION, DEFAULT_CARD_MOVE_SPEED)
-	$"../Discard".discard_pile.append(played_card)
+func move_card_to_discard(card) -> void:
+	$"../PlayerHand".animate_card_to_position(card, DISCARD_PILE_POSITION, DEFAULT_CARD_MOVE_SPEED)
+	$"../Discard".discard_pile.append(card)
 	$"../Discard".update_discard_display()
 	await get_tree().create_timer(DEFAULT_CARD_MOVE_SPEED).timeout
-	remove_child(played_card)
+	remove_child(card)
 	print($"../Discard".discard_pile)
-
+	
+func move_hand_to_discard() -> void:
+	player_hand_reference.player_hand.reverse()
+	for i in player_hand_reference.player_hand:
+		move_card_to_discard(i)
+		await get_tree().create_timer(DEFAULT_CARD_MOVE_SPEED).timeout
+	player_hand_reference.clear_hand()
+		
 # Connect signals from newly created cards to this manager
 func connect_card_signals(card: Node2D) -> void:
 	card.connect("hovered", on_hovered_over_card)
@@ -165,3 +172,10 @@ func get_card_with_highest_z_index(cards: Array) -> Node2D:
 			highest_z_index = current_card.z_index
 	
 	return highest_z_card
+
+func _on_turn_manager_pressed() -> void:
+	$"../Deck".currently_drawing_a_card = true
+	# Move hand to discard pile
+	move_hand_to_discard()
+	await get_tree().create_timer(DEFAULT_CARD_MOVE_SPEED * 10).timeout
+	$"../Deck".draw_hand(5)

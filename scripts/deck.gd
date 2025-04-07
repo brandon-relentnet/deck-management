@@ -8,6 +8,7 @@ const CARD_DRAW_SPEED = 0.25                      # Animation speed when drawing
 var player_deck = ["Knight", "Knight", "Knight", "Knight", "Knight", "Knight", "Knight", "Knight", "Knight", "Knight", "Knight", "Knight", "Knight", "Knight", "Knight", "Knight", "Knight", "Knight"]
 # Load the card scene resource
 var card_scene = preload(CARD_SCENE_PATH)
+var currently_drawing_a_card: bool = false
 
 # Called when the node enters the scene tree
 func _ready() -> void:
@@ -40,9 +41,12 @@ func draw_card() -> void:
 	spawn_card()
 
 func draw_hand(cards_to_draw) -> void:
+	currently_drawing_a_card = true
 	for i in cards_to_draw:
-		await get_tree().create_timer(0.2).timeout
+		await get_tree().create_timer(CARD_DRAW_SPEED).timeout
 		draw_card()
+	await get_tree().create_timer(CARD_DRAW_SPEED).timeout
+	currently_drawing_a_card = false
 
 # Disables the deck visuals and interaction when empty
 func disable_deck() -> void:
