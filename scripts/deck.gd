@@ -22,15 +22,18 @@ func update_deck_display() -> void:
 
 # Main function to draw a card from the deck
 func draw_card() -> void:
-	# Safety check: don't try to draw from an empty deck
+	# Safety check: don't try to draw from an empty deck or if hand is full
 	if $"../PlayerHand".player_hand.size() >= 10:
 		return
 	
-	if player_deck.size() == 0:
+	# Check if deck is empty and needs to refresh from discard
+	if player_deck.size() == 0 and $"../Discard".discard_pile.size() > 0:
+		# We need to properly wait for the complete animation
 		await move_discard_to_draw()
-		
-		if player_deck.size() == 0:
-			return
+	
+	# If deck is still empty after trying to refresh, just return
+	if player_deck.size() == 0:
+		return
 	
 	# Take the first card from the deck
 	var card_drawn = player_deck[0]
@@ -48,9 +51,19 @@ func draw_card() -> void:
 
 func draw_hand(cards_to_draw) -> void:
 	currently_drawing_a_card = true
+	
+	# First check if we need to refresh the deck before drawing
+	if player_deck.size() == 0 and $"../Discard".discard_pile.size() > 0:
+		# Wait for the entire animation to complete before drawing any cards
+		await move_discard_to_draw()
+	
+	# Now draw the cards one by one
 	for i in cards_to_draw:
-		await get_tree().create_timer(CARD_DRAW_SPEED).timeout
-		draw_card()
+		# Only try to draw if we have cards left
+		if player_deck.size() > 0 or $"../Discard".discard_pile.size() > 0:
+			await get_tree().create_timer(CARD_DRAW_SPEED).timeout
+			await draw_card()
+	
 	await get_tree().create_timer(CARD_DRAW_SPEED).timeout
 	currently_drawing_a_card = false
 
@@ -75,9 +88,9 @@ func spawn_card() -> void:
 
 func move_discard_to_draw() -> void:
 	# Animation constants
-	const ANIMATION_DURATION = 0.4
+	const ANIMATION_DURATION = 0.7
 	const CARD_OFFSET = 0.03  # Small time offset between cards
-	const ARC_HEIGHT = -250    # Height of the parabolic arc
+	const ARC_HEIGHT = 250    # Height of the parabolic arc
 	
 	# Get positions for animation
 	var discard_position = $"../Discard".global_position
@@ -86,10 +99,20 @@ func move_discard_to_draw() -> void:
 	# Store the number of cards to animate
 	var card_count = $"../Discard".discard_pile.size()
 	if card_count == 0:
-		return
+		return  # Return early if there's nothing to animate
+	
+	# This function is now properly awaitable
 	
 	# Create and setup all card visuals at once - initially stacked perfectly
 	var card_visuals = []
+	
+	# Get z_index values of discard and draw piles to ensure cards are under them
+	var discard_z_index = $"../Discard".z_index
+	var draw_z_index = z_index
+	
+	# Use a lower z_index to make cards appear underneath both piles
+	var animation_z_index = min(discard_z_index, draw_z_index) - 1
+	
 	for i in card_count:
 		var card_visual = Sprite2D.new()
 		add_child(card_visual)
@@ -99,7 +122,9 @@ func move_discard_to_draw() -> void:
 		card_visual.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 		card_visual.global_position = discard_position
 		card_visual.self_modulate.a = 0.7
-		card_visual.z_index = card_count - i  # Stack order (highest z_index on top)
+		
+		# Make sure the z_index is lower than both piles
+		card_visual.z_index = animation_z_index
 		
 		card_visuals.append(card_visual)
 	
