@@ -6,6 +6,7 @@ signal hovered_off(card)  # Sent when mouse exits card area
 
 # Stores the card's position in the player's hand for animation purposes
 var hand_position: Vector2
+var energy: int = 0
 
 # Called when the node enters the scene tree
 func _ready() -> void:

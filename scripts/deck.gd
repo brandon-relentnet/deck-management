@@ -5,7 +5,26 @@ const CARD_SCENE_PATH = "res://scenes/card.tscn"  # Path to the card scene file
 const CARD_DRAW_SPEED = 0.25                      # Animation speed when drawing a card
 
 # Deck contents - the cards available to draw
-var player_deck = ["Knight", "Knight", "Knight", "Knight", "Knight", "Knight", "Knight", "Knight", "Knight", "Knight", "Knight", "Knight", "Knight", "Knight", "Knight", "Knight", "Knight", "Knight"]
+var player_deck = [
+	{"name": "Knight", "energy": 1},
+	{"name": "Knight", "energy": 2},
+	{"name": "Knight", "energy": 3},
+	{"name": "Knight", "energy": 1},
+	{"name": "Knight", "energy": 2},
+	{"name": "Knight", "energy": 3},
+	{"name": "Knight", "energy": 1},
+	{"name": "Knight", "energy": 2},
+	{"name": "Knight", "energy": 3},
+	{"name": "Knight", "energy": 1},
+	{"name": "Knight", "energy": 2},
+	{"name": "Knight", "energy": 3},
+	{"name": "Knight", "energy": 1},
+	{"name": "Knight", "energy": 2},
+	{"name": "Knight", "energy": 3},
+	{"name": "Knight", "energy": 1},
+	{"name": "Knight", "energy": 2},
+	{"name": "Knight", "energy": 3}
+	]
 # Load the card scene resource
 var card_scene = preload(CARD_SCENE_PATH)
 var currently_drawing_a_card: bool = false
@@ -34,17 +53,6 @@ func draw_card() -> void:
 	# If deck is still empty after trying to refresh, just return
 	if player_deck.size() == 0:
 		return
-	
-	# Take the first card from the deck
-	var card_drawn = player_deck[0]
-	player_deck.erase(card_drawn)
-	
-	# If that was the last card, disable the deck visuals and interaction
-	if player_deck.size() == 0:
-		disable_deck()
-	
-	# Update the deck counter
-	update_deck_display()
 	
 	# Create and add the card to the game
 	spawn_card()
@@ -76,8 +84,19 @@ func disable_deck() -> void:
 
 # Creates a new card instance and adds it to the player's hand
 func spawn_card() -> void:
+	# Take the first card from the deck
+	var card_drawn = player_deck[0]
+	player_deck.erase(card_drawn)
+	
 	# Create a new instance of the card
 	var new_card = card_scene.instantiate()
+	
+	# Set the card's properties based on drawn card
+	new_card.energy = card_drawn.energy
+	
+	# If the card has a RichTextLabel for energy, update it
+	if new_card.has_node("EnergyLabel"):
+		new_card.get_node("EnergyLabel").text = str(card_drawn.energy)
 	
 	# Add the card to the card manager for proper tracking
 	$"../CardManager".add_child(new_card)
@@ -85,12 +104,19 @@ func spawn_card() -> void:
 	
 	# Add the card to the player's hand with animation
 	$"../PlayerHand".add_card_to_hand(new_card, CARD_DRAW_SPEED)
+	
+	# Update the deck counter
+	update_deck_display()
+	
+	# If that was the last card, disable the deck visuals and interaction
+	if player_deck.size() == 0:
+		disable_deck()
 
 func move_discard_to_draw() -> void:
 	# Animation constants
-	const ANIMATION_DURATION = 0.7
-	const CARD_OFFSET = 0.03  # Small time offset between cards
-	const ARC_HEIGHT = 250    # Height of the parabolic arc
+	const ANIMATION_DURATION = 0.5
+	const CARD_OFFSET = 0.015  # Small time offset between cards
+	const ARC_HEIGHT = -150    # Height of the parabolic arc
 	
 	# Get positions for animation
 	var discard_position = $"../Discard".global_position
@@ -100,8 +126,6 @@ func move_discard_to_draw() -> void:
 	var card_count = $"../Discard".discard_pile.size()
 	if card_count == 0:
 		return  # Return early if there's nothing to animate
-	
-	# This function is now properly awaitable
 	
 	# Create and setup all card visuals at once - initially stacked perfectly
 	var card_visuals = []
