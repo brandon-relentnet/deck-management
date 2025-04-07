@@ -2,8 +2,8 @@ extends Node2D
 
 # Constants for card creation and animation
 const CARD_SCENE_PATH = "res://scenes/card.tscn"  # Path to the card scene file
-const CARD_DRAW_SPEED = 0.1                   # Animation speed when drawing a card
-const CURRENT_HAND_DRAW = 10
+const CARD_DRAW_SPEED = 0.3                   # Animation speed when drawing a card (increased for better feel)
+const CURRENT_HAND_DRAW = 5
 
 # Deck contents - the cards available to draw
 var player_deck = [
@@ -29,6 +29,8 @@ var player_deck = [
 # Load the card scene resource
 var card_scene = preload(CARD_SCENE_PATH)
 var currently_drawing_a_card: bool = false
+# Reference array to keep cards from being freed prematurely
+var active_card_visuals = []
 
 # Called when the node enters the scene tree
 func _ready() -> void:
@@ -70,10 +72,11 @@ func draw_hand(cards_to_draw) -> void:
 	for i in cards_to_draw:
 		# Only try to draw if we have cards left
 		if player_deck.size() > 0 or $"../Discard".discard_pile.size() > 0:
-			await get_tree().create_timer(CARD_DRAW_SPEED).timeout
+			# Using a slightly progressive delay between cards for more natural feel
+			await get_tree().create_timer(CARD_DRAW_SPEED * 0.5).timeout
 			await draw_card()
 	
-	await get_tree().create_timer(CARD_DRAW_SPEED).timeout
+	await get_tree().create_timer(CARD_DRAW_SPEED * 0.5).timeout
 	currently_drawing_a_card = false
 
 # Disables the deck visuals and interaction when empty
@@ -103,8 +106,16 @@ func spawn_card() -> void:
 	$"../CardManager".add_child(new_card)
 	new_card.name = "Card"
 	
+	# Initial setup for better animation
+	new_card.scale = Vector2(0.8, 0.8)  # Start smaller
+	new_card.rotation_degrees = -10     # Start slightly rotated
+	new_card.modulate.a = 0.7           # Start slightly transparent
+	
 	# Add the card to the player's hand with animation
-	$"../PlayerHand".add_card_to_hand(new_card, CARD_DRAW_SPEED)
+	$"../PlayerHand".add_card_to_hand_with_effects(new_card, CARD_DRAW_SPEED)
+	
+	# Add a subtle shake effect to the deck when drawing
+	apply_deck_shake()
 	
 	# Update the deck counter
 	update_deck_display()
@@ -113,9 +124,24 @@ func spawn_card() -> void:
 	if player_deck.size() == 0:
 		disable_deck()
 
+func apply_deck_shake() -> void:
+	# Create a small shake animation for the deck
+	var tween = create_tween()
+	var original_pos = position
+	
+	# Quick back-and-forth movement
+	tween.tween_property(self, "position", original_pos + Vector2(3, 0), 0.05)
+	tween.tween_property(self, "position", original_pos, 0.05)
+
 func move_discard_to_draw() -> void:
+	# Clear any leftover card visuals from previous animations
+	for old_visual in active_card_visuals:
+		if is_instance_valid(old_visual):
+			old_visual.queue_free()
+	active_card_visuals.clear()
+	
 	# Animation constants
-	const ANIMATION_DURATION = 0.5
+	const ANIMATION_DURATION = 0.3
 	const CARD_OFFSET = 0.015  # Small time offset between cards
 	const ARC_HEIGHT = -150    # Height of the parabolic arc
 	
@@ -152,6 +178,8 @@ func move_discard_to_draw() -> void:
 		card_visual.z_index = animation_z_index
 		
 		card_visuals.append(card_visual)
+		# Add to reference array to prevent premature freeing
+		active_card_visuals.append(card_visual)
 	
 	# First animate cards slightly apart to create the "fanning" effect
 	for i in card_count:
@@ -173,6 +201,10 @@ func move_discard_to_draw() -> void:
 	
 	# Animate cards along smooth arc path
 	for i in card_count:
+		# Skip if card was somehow removed
+		if i >= card_visuals.size() or !is_instance_valid(card_visuals[i]):
+			continue
+			
 		var start_pos = card_visuals[i].global_position
 		var end_pos = deck_position
 		var control_point = Vector2(
@@ -185,14 +217,24 @@ func move_discard_to_draw() -> void:
 		tween.set_trans(Tween.TRANS_QUAD)
 		tween.set_ease(Tween.EASE_IN_OUT)
 		
-		# Use custom method to move along a quadratic bezier curve
-		tween.tween_method(
-			func(t: float):
+		# Add rotation animation for more dynamism (new feature)
+		tween.parallel().tween_property(card_visuals[i], "rotation_degrees", 
+										randi_range(-20, 20), ANIMATION_DURATION)
+		
+		# Create a customized callable for bezier animation that uses a local reference
+		# This avoids the "previously freed" error by using the stored local reference
+		var target_card = card_visuals[i]
+		var callable = func(t: float):
+			if is_instance_valid(target_card):
 				# Quadratic Bezier formula: (1-t)²P₀ + 2(1-t)tP₁ + t²P₂
 				var one_minus_t = 1.0 - t
-				card_visuals[i].global_position = one_minus_t * one_minus_t * start_pos + \
+				target_card.global_position = one_minus_t * one_minus_t * start_pos + \
 										2 * one_minus_t * t * control_point + \
-										t * t * end_pos,
+										t * t * end_pos
+		
+		# Use custom method to move along a quadratic bezier curve
+		tween.tween_method(
+			callable,
 			0.0,  # Start progress
 			1.0,  # End progress
 			ANIMATION_DURATION
@@ -202,11 +244,13 @@ func move_discard_to_draw() -> void:
 		tween.tween_property(card_visuals[i], "modulate:a", 0, 0.15)
 	
 	# Wait for the last card animation to complete
-	await get_tree().create_timer(ANIMATION_DURATION + (card_count * CARD_OFFSET) + 0.2).timeout
+	await get_tree().create_timer(ANIMATION_DURATION + (card_count * CARD_OFFSET) + 0.5).timeout
 	
 	# Remove all the temporary visuals
-	for card_visual in card_visuals:
-		card_visual.queue_free()
+	for card_visual in active_card_visuals:
+		if is_instance_valid(card_visual):
+			card_visual.queue_free()
+	active_card_visuals.clear()
 	
 	# Shuffle the deck
 	player_deck.shuffle()
