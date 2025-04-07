@@ -1,99 +1,152 @@
 extends Node2D
 
-const COLLISION_MASK_CARD = 1
-const COLLISION_MASK_CARD_SLOT = 2
-const DEFAULT_CARD_MOVE_SPEED = 0.1
+# Collision mask constants for physics interactions
+const COLLISION_MASK_CARD = 1      # Used for detecting cards
+const COLLISION_MASK_CARD_SLOT = 2 # Used for detecting card slots
+const DEFAULT_CARD_MOVE_SPEED = 0.1 # Default animation speed for card movement
 
-var card_being_dragged
-var screen_size
-var is_hovering_on_card
-var player_hand_reference
+# State variables
+var card_being_dragged: Node2D = null  # Reference to the card currently being dragged
+var screen_size: Vector2               # Cached screen dimensions to limit card movement
+var is_hovering_on_card: bool = false  # Tracks if the cursor is hovering over any card
+var player_hand_reference: Node2D      # Reference to the player's hand node
 
-func _ready():
+# Called when the node enters the scene tree
+func _ready() -> void:
+	# Cache screen size for boundary checking
 	screen_size = get_viewport_rect().size
+	
+	# Get reference to the player hand node
 	player_hand_reference = $"../PlayerHand"
+	
+	# Connect to input manager's mouse release signal
 	$"../InputManager".connect("left_mouse_button_released", on_left_click_released)
 
-func _process(_delta):
-	if card_being_dragged:
-		var mouse_pos = get_global_mouse_position()
-		card_being_dragged.position = Vector2(clamp(mouse_pos.x, 0, screen_size.x), clamp(mouse_pos.y, 0, screen_size.y))
+# Called every frame
+func _process(_delta: float) -> void:
+	# Early return if no card is being dragged - optimization to avoid unnecessary processing
+	if not card_being_dragged:
+		return
+	
+	# Update the dragged card's position to follow the mouse, but stay within screen boundaries
+	var mouse_pos = get_global_mouse_position()
+	card_being_dragged.position = Vector2(
+		clamp(mouse_pos.x, 0, screen_size.x), 
+		clamp(mouse_pos.y, 0, screen_size.y)
+	)
 
-func start_drag(card):
+# Begin dragging a card
+func start_drag(card: Node2D) -> void:
 	card_being_dragged = card
+	# Reset scale to normal when dragging
 	card.scale = Vector2(1, 1)
 
-func finish_drag():
+# Finish dragging a card and determine where it should go
+func finish_drag() -> void:
+	# Slightly enlarge the card for visual feedback
 	card_being_dragged.scale = Vector2(1.05, 1.05)
-	var card_slot_found = raycast_check_for_card_slot()
-	if card_slot_found and not card_slot_found.card_in_slot:
+	
+	# Check if the card is over a valid card slot
+	var card_slot = raycast_check_for_card_slot()
+	
+	if card_slot and not card_slot.card_in_slot:
+		# Place card in slot
 		player_hand_reference.remove_card_from_hand(card_being_dragged)
-		card_being_dragged.position = card_slot_found.position
+		card_being_dragged.position = card_slot.position
+		# Disable collision to prevent further interaction with placed card
 		card_being_dragged.get_node("Area2D/CollisionShape2D").disabled = true
-		card_slot_found.card_in_slot = true
+		card_slot.card_in_slot = true
 	else:
+		# Return card to hand if not placed in a slot
 		player_hand_reference.add_card_to_hand(card_being_dragged, DEFAULT_CARD_MOVE_SPEED)
+	
+	# Clear dragging reference
 	card_being_dragged = null
 
-func connect_card_signals(card):
+# Connect signals from newly created cards to this manager
+func connect_card_signals(card: Node2D) -> void:
 	card.connect("hovered", on_hovered_over_card)
 	card.connect("hovered_off", on_hovered_off_card)
 
-func on_left_click_released():
+# Handler for mouse button release
+func on_left_click_released() -> void:
 	if card_being_dragged:
 		finish_drag()
 
-func on_hovered_over_card(card):
-	if !is_hovering_on_card:
+# Handler for when the mouse enters a card's area
+func on_hovered_over_card(card: Node2D) -> void:
+	# Only update if we weren't already hovering over a card
+	if not is_hovering_on_card:
 		is_hovering_on_card = true
 		highlight_card(card, true)
 	
-func on_hovered_off_card(card):
-	if !card_being_dragged:
-		highlight_card(card, false)
-		var new_card_hovered = raycast_check_for_card()
-		if new_card_hovered:
-			highlight_card(new_card_hovered, true)
-		else: 
-			is_hovering_on_card = false
+# Handler for when the mouse exits a card's area
+func on_hovered_off_card(card: Node2D) -> void:
+	# Ignore hover-off events while dragging
+	if card_being_dragged:
+		return
 	
-func highlight_card(card, hovered):
-	if hovered:
-		card.scale = Vector2(1.05, 1.05)
-		card.z_index = 2
-	else:
-		card.scale = Vector2(1, 1)
-		card.z_index = 1
+	# Remove highlight from the card we just left
+	highlight_card(card, false)
+	
+	# Check if we immediately entered another card
+	var new_card_hovered = raycast_check_for_card()
+	
+	if new_card_hovered:
+		highlight_card(new_card_hovered, true)
+	else: 
+		is_hovering_on_card = false
+	
+# Apply or remove visual highlighting from a card
+func highlight_card(card: Node2D, hovered: bool) -> void:
+	# Ternary operators for concise visual state changes
+	card.scale = Vector2(1.05, 1.05) if hovered else Vector2(1, 1)
+	card.z_index = 2 if hovered else 1
 
-func raycast_check_for_card_slot():
+# Convenience wrapper for checking for card slots at the current mouse position
+func raycast_check_for_card_slot() -> Node2D:
+	return raycast_check_for_object(COLLISION_MASK_CARD_SLOT)
+
+# Convenience wrapper for checking for cards at the current mouse position
+func raycast_check_for_card() -> Node2D:
+	var result = raycast_check_for_object(COLLISION_MASK_CARD)
+	if not result or result.size() == 0:
+		return null
+	
+	# If multiple cards are under the cursor, get the one with highest z-index (visually on top)
+	return get_card_with_highest_z_index(result)
+
+# Generic function for detecting objects at the mouse position with a specific collision mask
+func raycast_check_for_object(collision_mask: int):
+	# Set up the physics query
 	var space_state = get_world_2d().direct_space_state
 	var parameters = PhysicsPointQueryParameters2D.new()
 	parameters.position = get_global_mouse_position()
 	parameters.collide_with_areas = true
-	parameters.collision_mask = COLLISION_MASK_CARD_SLOT
+	parameters.collision_mask = collision_mask
+	
+	# Perform the raycast
 	var result = space_state.intersect_point(parameters)
+	
 	if result.size() > 0:
-		return result[0].collider.get_parent()
-	return null
-
-func raycast_check_for_card():
-	var space_state = get_world_2d().direct_space_state
-	var parameters = PhysicsPointQueryParameters2D.new()
-	parameters.position = get_global_mouse_position()
-	parameters.collide_with_areas = true
-	parameters.collision_mask = COLLISION_MASK_CARD
-	var result = space_state.intersect_point(parameters)
-	if result.size() > 0:
-		return get_card_with_highest_z_index(result)
+		# For card slots, return the parent node directly
+		if collision_mask == COLLISION_MASK_CARD_SLOT:
+			return result[0].collider.get_parent()
+		# For cards, return the whole result array for z-index sorting
+		return result
 	return null
 	
-func get_card_with_highest_z_index(cards):
+# From an array of physics results, find the card with the highest z-index
+func get_card_with_highest_z_index(cards: Array) -> Node2D:
+	# Start with the first card as our candidate
 	var highest_z_card = cards[0].collider.get_parent()
 	var highest_z_index = highest_z_card.z_index
 	
+	# Check all other cards
 	for i in range(1, cards.size()):
 		var current_card = cards[i].collider.get_parent()
 		if current_card.z_index > highest_z_index:
 			highest_z_card = current_card
 			highest_z_index = current_card.z_index
+	
 	return highest_z_card
