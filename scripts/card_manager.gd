@@ -100,13 +100,14 @@ func try_play_card(card_slot) -> bool:
 
 # Move a card to the discard pile
 func move_card_to_discard(card) -> void:
+	print("moving card to discard pile")
 	if !is_instance_valid(card):
 		return
 		
 	# Ensure the card is visually below the discard pile
 	card.z_index = -1
 		
-	player_hand_reference.animate_card_to_position(card, DISCARD_PILE_POSITION, DEFAULT_CARD_MOVE_SPEED)
+	player_hand_reference.animate_card_to_position_with_effects(card, DISCARD_PILE_POSITION, DEFAULT_CARD_MOVE_SPEED)
 	
 	var discard_pile = $"../Discard"
 	discard_pile.discard_pile.append(card)

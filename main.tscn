@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://bvm1l0sks3mxk"]
+[gd_scene load_steps=11 format=3 uid="uid://bvm1l0sks3mxk"]
 
 [ext_resource type="PackedScene" uid="uid://brakl80fqtkxy" path="res://scenes/card_slot.tscn" id="2_1bvp3"]
 [ext_resource type="Script" uid="uid://l87bixt6uy5b" path="res://scripts/card_manager.gd" id="2_h2yge"]
@@ -7,7 +7,6 @@
 [ext_resource type="Script" uid="uid://dtcece7lyqaaa" path="res://scripts/input_manager.gd" id="6_7mycd"]
 [ext_resource type="PackedScene" uid="uid://csw2g32wfd03q" path="res://scenes/discard.tscn" id="6_272bh"]
 [ext_resource type="PackedScene" uid="uid://ddd4e4gfmyeeh" path="res://scenes/turn_manager.tscn" id="7_272bh"]
-[ext_resource type="Script" uid="uid://c0kwn0u5jax75" path="res://draw_pile_view.gd" id="8_5vw27"]
 
 [sub_resource type="Gradient" id="Gradient_7mycd"]
 colors = PackedColorArray(0.564706, 0.364706, 1, 1, 1, 0.552941, 1, 1)
@@ -52,7 +51,6 @@ position = Vector2(1770, 890)
 
 [node name="DrawPileView" type="CanvasLayer" parent="."]
 visible = false
-script = ExtResource("8_5vw27")
 
 [node name="ScrollContainer" type="ScrollContainer" parent="DrawPileView"]
 anchors_preset = 15

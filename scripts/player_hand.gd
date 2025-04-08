@@ -23,7 +23,7 @@ func add_card_to_hand(card: Node2D, speed: float) -> void:
 		update_hand_positions(speed)
 	else:
 		# If the card is already in hand, just move it to its saved position
-		animate_card_to_position(card, card.hand_position, DEFAULT_CARD_MOVE_SPEED)
+		animate_card_to_position_with_effects(card, card.hand_position, DEFAULT_CARD_MOVE_SPEED)
 
 # Enhanced version of add_card_to_hand with visual effects
 func add_card_to_hand_with_effects(card: Node2D, speed: float) -> void:
@@ -45,7 +45,7 @@ func update_hand_positions(speed: float) -> void:
 		# Store the position on the card for later reference
 		card.hand_position = new_position
 		# Animate the card moving to its new position
-		animate_card_to_position(card, new_position, speed)
+		animate_card_to_position_with_effects(card, new_position, speed)
 
 # Enhanced version with effects for all cards
 func update_hand_positions_with_effects(speed: float) -> void:
@@ -65,11 +65,6 @@ func calculate_card_position(index: int) -> float:
 	var x_offset = (card_count - 1) * CARD_WIDTH
 	# Return position that centers the entire hand on screen
 	return center_screen_x + index * CARD_WIDTH - x_offset / 2
-
-# Creates a tween to smoothly move a card to a new position
-func animate_card_to_position(card: Node2D, new_position: Vector2, speed: float) -> void:
-	var tween = get_tree().create_tween()
-	tween.tween_property(card, "position", new_position, speed)
 
 # Enhanced animation with effects
 func animate_card_to_position_with_effects(card: Node2D, new_position: Vector2, speed: float) -> void:
