@@ -26,15 +26,17 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0, 0, 0, 0.560784)
+color = Color(0, 0, 0, 0.705882)
 
 [node name="DrawPileScroll" type="ScrollContainer" parent="."]
+visible = false
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 horizontal_scroll_mode = 0
+vertical_scroll_mode = 3
 script = ExtResource("1_rqpms")
 wheel_scroll_damper = SubResource("Resource_fdvxv")
 dragging_scroll_damper = SubResource("Resource_puyw0")
@@ -56,6 +58,7 @@ theme_override_constants/v_separation = 25
 columns = 4
 
 [node name="DiscardPileScroll" type="ScrollContainer" parent="."]
+visible = false
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0

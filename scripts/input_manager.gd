@@ -26,7 +26,6 @@ func _ready() -> void:
 	discard_reference.connect("discard_pile_opened", _on_discard_pile_opened)
 	discard_reference.connect("discard_pile_closed", _on_discard_pile_closed)
 	
-	
 func _on_draw_pile_opened() -> void:
 	draw_pile_view_open = true
 
@@ -58,8 +57,8 @@ func process_click() -> void:
 	if result.size() > 0:
 		var card_found = result[0].collider.get_parent()
 		if card_found:
-			# Don't allow dragging cards when draw pile view is open
-			if not draw_pile_view_open:
+			# Don't allow dragging cards when any pile view is open
+			if not draw_pile_view_open and not discard_pile_view_open:
 				card_manager_reference.start_drag(card_found)
 			return
 			
@@ -69,6 +68,7 @@ func process_click() -> void:
 		var parent_node = result[0].collider.get_parent()
 		
 		if parent_node in [deck_reference, discard_reference]:
+			# Check if we're clicking on the deck or discard
 			var is_deck = parent_node == deck_reference
 			
 			# Get references to the relevant pile objects based on what was clicked

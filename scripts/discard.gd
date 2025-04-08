@@ -21,51 +21,16 @@ func _ready():
 
 # Updates the visual counter showing how many cards are in the discard pile
 func update_discard_display() -> void:
-	# Apply shake effect when cards are added/removed
-	Utils.apply_shake_effect(self)
+	CardPileUtils.update_display(self, discard_pile.size())
 	
+	# Ensure counter is visible above everything (specific to discard)
 	if has_node("RichTextLabel"):
-		$RichTextLabel.text = str(discard_pile.size())
-		$"../CardPileView/DiscardPileLabel".text = str(discard_pile.size())
-		# Ensure counter is visible above everything
 		$RichTextLabel.z_index = 21
 
-# Show the draw pile view UI
+# Show the discard pile view UI (now uses CardPileUtils)
 func view_discard_pile() -> void:
-	emit_signal("discard_pile_opened")
+	CardPileUtils.view_pile(self, card_scene, discard_pile, false)
 	
-	# Clear any existing cards in the view
-	for child in $"../CardPileView/DiscardPileScroll/MarginContainer/GridContainer".get_children():
-		child.queue_free()
-	
-	# Create a visual representation for each card in the draw pile
-	for card_id in discard_pile:
-		var new_card = card_scene.instantiate()
-		new_card.setup_from_id(card_id)
-		
-		# Reset rotation to avoid UI issues
-		new_card.rotation_degrees = 0
-		
-		# Cards need a minimum size to render properly in HBoxContainer
-		var control = Control.new()
-		control.custom_minimum_size = Vector2(160, 240)
-		control.add_child(new_card)
-		
-		# Position the card within its Control container
-		new_card.position = Vector2(60, 90)
-		
-		$"../CardPileView/DiscardPileScroll/MarginContainer/GridContainer".add_child(control)
-		
-		# Disable dragging or other interactions for these preview cards
-		if new_card.has_node("Area2D"):
-			new_card.get_node("Area2D").input_pickable = false
-	
-	# Make sure the TextureRect is visible
-	$"../CardPileView".visible = true
-	$"../CardPileView/DiscardPileScroll".visible = true
-	
-# Close the draw pile view
+# Close the discard pile view (now uses CardPileUtils)
 func close_discard_pile() -> void:
-	$"../CardPileView".visible = false
-	$"../CardPileView/DiscardPileScroll".visible = false
-	emit_signal("discard_pile_closed")
+	CardPileUtils.close_pile(self, false)
