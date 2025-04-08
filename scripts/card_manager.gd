@@ -43,6 +43,10 @@ func start_drag(card: Node2D) -> void:
 
 # Finish dragging a card and determine where it should go
 func finish_drag() -> void:
+	if !is_instance_valid(card_being_dragged):
+		card_being_dragged = null
+		return
+		
 	set_card_scale(card_being_dragged, true) # Slightly enlarge the card for visual feedback
 	
 	# Check if the card is over a valid card slot
@@ -66,7 +70,7 @@ func try_play_card(card_slot) -> bool:
 		return false
 		
 	# Check energy requirements
-	var card_energy_cost: int = (card_being_dragged.get_node("EnergyLabel").text).to_int()
+	var card_energy_cost = card_being_dragged.energy
 	if turn_manager.player_energy < card_energy_cost:
 		return false
 		
@@ -83,6 +87,9 @@ func try_play_card(card_slot) -> bool:
 	card_being_dragged.get_node("Area2D/CollisionShape2D").disabled = true
 	card_slot.card_in_slot = true
 	
+	# Immediately set z-index to ensure it's below the discard pile when it moves there
+	card_being_dragged.z_index = -5
+	
 	# Process card effects and move to discard
 	move_card_to_discard(card_slot.played_card)
 	card_slot.card_in_slot = false
@@ -91,14 +98,20 @@ func try_play_card(card_slot) -> bool:
 
 # Move a card to the discard pile
 func move_card_to_discard(card) -> void:
+	if !is_instance_valid(card):
+		return
+		
+	# Ensure the card is visually below the discard pile
+	card.z_index = -1
+		
 	player_hand_reference.animate_card_to_position(card, DISCARD_PILE_POSITION, DEFAULT_CARD_MOVE_SPEED)
 	
 	var discard_pile = $"../Discard"
 	discard_pile.discard_pile.append(card)
 	discard_pile.update_discard_display()
 	
-	await create_timer(DEFAULT_CARD_MOVE_SPEED)
-	remove_child(card)
+	if is_instance_valid(card):
+		card.z_index = -5
 
 # Discards all cards in the player's hand
 func move_hand_to_discard() -> void:
@@ -117,8 +130,9 @@ func create_timer(duration: float):
 		
 # Connect signals from newly created cards to this manager
 func connect_card_signals(card: Node2D) -> void:
-	card.connect("hovered", on_hovered_over_card)
-	card.connect("hovered_off", on_hovered_off_card)
+	if card.has_signal("hovered") and card.has_signal("hovered_off"):
+		card.connect("hovered", on_hovered_over_card)
+		card.connect("hovered_off", on_hovered_off_card)
 
 # Handler for mouse button release
 func on_left_click_released() -> void:

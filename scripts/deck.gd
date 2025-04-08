@@ -2,30 +2,21 @@ extends Node2D
 
 # Constants for card creation and animation
 const CARD_SCENE_PATH = "res://scenes/card.tscn"  # Path to the card scene file
-const CARD_DRAW_SPEED = 0.3                   # Animation speed when drawing a card (increased for better feel)
+const CARD_DRAW_SPEED = 0.3                   # Animation speed when drawing a card
 const CURRENT_HAND_DRAW = 5
 
-# Deck contents - the cards available to draw
+# Deck contents - stored as card IDs that reference the card database
 var player_deck = [
-	{"name": "Knight", "energy": 1},
-	{"name": "Knight", "energy": 2},
-	{"name": "Knight", "energy": 3},
-	{"name": "Knight", "energy": 1},
-	{"name": "Knight", "energy": 2},
-	{"name": "Knight", "energy": 3},
-	{"name": "Knight", "energy": 1},
-	{"name": "Knight", "energy": 2},
-	{"name": "Knight", "energy": 3},
-	{"name": "Knight", "energy": 1},
-	{"name": "Knight", "energy": 2},
-	{"name": "Knight", "energy": 3},
-	{"name": "Knight", "energy": 1},
-	{"name": "Knight", "energy": 2},
-	{"name": "Knight", "energy": 3},
-	{"name": "Knight", "energy": 1},
-	{"name": "Knight", "energy": 2},
-	{"name": "Knight", "energy": 3}
-	]
+	"knight_1", "knight_2", "knight_3",
+	"knight_1", "knight_2", "knight_3",
+	"knight_1", "knight_2", "knight_3",
+	"knight_1", "knight_2", "knight_3",
+	"knight_1", "knight_2", "knight_3",
+	"knight_1", "knight_2", "knight_3",
+	"mage_3", "mage_3", "mage_3",
+	"mage_3", "mage_3", "mage_3",
+]
+
 # Load the card scene resource
 var card_scene = preload(CARD_SCENE_PATH)
 var currently_drawing_a_card: bool = false
@@ -34,7 +25,12 @@ var active_card_visuals = []
 
 # Called when the node enters the scene tree
 func _ready() -> void:
+	# Shuffle the deck at the start of the game
+	player_deck.shuffle()
+	
+	# Draw initial hand
 	draw_hand(CURRENT_HAND_DRAW)
+	
 	# Initialize the deck counter display
 	update_deck_display()
 
@@ -88,23 +84,19 @@ func disable_deck() -> void:
 
 # Creates a new card instance and adds it to the player's hand
 func spawn_card() -> void:
-	# Take the first card from the deck
-	var card_drawn = player_deck[0]
-	player_deck.erase(card_drawn)
+	# Take the first card ID from the deck
+	var card_id = player_deck[0]
+	player_deck.erase(card_id)
 	
 	# Create a new instance of the card
 	var new_card = card_scene.instantiate()
 	
-	# Set the card's properties based on drawn card
-	new_card.energy = card_drawn.energy
-	
-	# If the card has a RichTextLabel for energy, update it
-	if new_card.has_node("EnergyLabel"):
-		new_card.get_node("EnergyLabel").text = str(card_drawn.energy)
+	# Set up the card with data from the card database
+	new_card.setup_from_id(card_id)
 	
 	# Add the card to the card manager for proper tracking
 	$"../CardManager".add_child(new_card)
-	new_card.name = "Card"
+	new_card.name = "Card_" + card_id  # Use the card ID for the node name
 	
 	# Initial setup for better animation
 	new_card.scale = Vector2(0.8, 0.8)  # Start smaller
@@ -193,7 +185,12 @@ func move_discard_to_draw() -> void:
 	
 	# Move all cards from discard to deck array
 	while $"../Discard".discard_pile.size() > 0:
-		player_deck.append($"../Discard".discard_pile.pop_back())
+		var card_node = $"../Discard".discard_pile.pop_back()
+		# Extract the card_id from the discarded card node
+		if is_instance_valid(card_node) and card_node.has_method("get") and card_node.get("card_id"):
+			player_deck.append(card_node.card_id)
+			# Now that we've stored the card ID, we can safely remove the node
+			card_node.queue_free()
 	
 	# Update displays
 	$"../Discard".update_discard_display()
@@ -217,7 +214,7 @@ func move_discard_to_draw() -> void:
 		tween.set_trans(Tween.TRANS_QUAD)
 		tween.set_ease(Tween.EASE_IN_OUT)
 		
-		# Add rotation animation for more dynamism (new feature)
+		# Add rotation animation for more dynamism
 		tween.parallel().tween_property(card_visuals[i], "rotation_degrees", 
 										randi_range(-20, 20), ANIMATION_DURATION)
 		
