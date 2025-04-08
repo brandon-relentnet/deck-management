@@ -14,6 +14,7 @@ static func update_display(pile_node: Node2D, count: int) -> void:
 	var pile_name = "Draw" if pile_node.name == "Deck" else "Discard"
 	var pile_label = pile_node.get_node("../CardPileView/" + pile_name + "PileLabel")
 	pile_label.text = str(count)
+	
 # Show the card pile view
 static func view_pile(pile_node: Node2D, card_scene: PackedScene, card_ids: Array, is_draw_pile: bool) -> void:
 	var pile_type = PileType.DRAW if is_draw_pile else PileType.DISCARD
@@ -41,8 +42,9 @@ static func view_pile(pile_node: Node2D, card_scene: PackedScene, card_ids: Arra
 	# Create a visual representation for each card in the pile
 	for card_id in display_card_ids:
 		var new_card = card_scene.instantiate()
+		
 		new_card.setup_from_id(card_id)
-
+		
 		# Reset rotation to avoid UI issues
 		new_card.rotation_degrees = 0
 

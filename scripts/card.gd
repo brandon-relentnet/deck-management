@@ -20,7 +20,7 @@ func _ready() -> void:
 		get_parent().connect_card_signals(self)
 	
 	# Set up initial visual properties
-	modulate.a = 0.9
+	# modulate.a = 0.9
 	scale = Vector2(1, 1)
 	z_index = 1
 
