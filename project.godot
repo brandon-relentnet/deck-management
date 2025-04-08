@@ -11,6 +11,7 @@ config_version=5
 [application]
 
 config/name="CardManagement"
+config/version="0.0.1"
 run/main_scene="uid://bvm1l0sks3mxk"
 config/features=PackedStringArray("4.4", "Forward Plus")
 config/icon="res://assets/icon.svg"
