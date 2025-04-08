@@ -2,8 +2,8 @@
 
 [ext_resource type="Script" uid="uid://bgqglerkcylxx" path="res://addons/SmoothScroll/SmoothScrollContainer.gd" id="1_rqpms"]
 [ext_resource type="Script" uid="uid://b7h0k2h2qwlqv" path="res://addons/SmoothScroll/scroll_damper/expo_scroll_damper.gd" id="2_achfp"]
-[ext_resource type="Texture2D" uid="uid://b8vppoupuycxn" path="res://assets/red-card-front.png" id="3_wdv8o"]
-[ext_resource type="Texture2D" uid="uid://ctx0154o1b8ax" path="res://assets/red-card-back.png" id="4_67a2i"]
+[ext_resource type="Texture2D" uid="uid://cwabyvmcqrkxt" path="res://assets/card-front-default.png" id="3_rqpms"]
+[ext_resource type="Texture2D" uid="uid://bgm8y5grgapbq" path="res://assets/card-back-default.png" id="4_achfp"]
 
 [sub_resource type="Resource" id="Resource_fdvxv"]
 script = ExtResource("2_achfp")
@@ -89,7 +89,7 @@ columns = 4
 texture_filter = 1
 position = Vector2(150, 890)
 scale = Vector2(2.5, 2.5)
-texture = ExtResource("3_wdv8o")
+texture = ExtResource("3_rqpms")
 
 [node name="DrawPileLabel" type="RichTextLabel" parent="."]
 z_index = 2
@@ -107,7 +107,7 @@ z_index = 2
 texture_filter = 1
 position = Vector2(1770, 890)
 scale = Vector2(2.5, 2.5)
-texture = ExtResource("4_67a2i")
+texture = ExtResource("4_achfp")
 
 [node name="DiscardPileLabel" type="RichTextLabel" parent="."]
 z_index = 2

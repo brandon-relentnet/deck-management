@@ -10,7 +10,7 @@
 [ext_resource type="PackedScene" uid="uid://cuayje03ahsa6" path="res://scenes/card_pile_view.tscn" id="8_5vw27"]
 
 [sub_resource type="Gradient" id="Gradient_7mycd"]
-colors = PackedColorArray(0.564706, 0.364706, 1, 1, 1, 0.552941, 1, 1)
+colors = PackedColorArray(0.121569, 0, 0, 1, 0, 0, 0.121569, 1)
 
 [sub_resource type="GradientTexture2D" id="GradientTexture2D_272bh"]
 gradient = SubResource("Gradient_7mycd")
