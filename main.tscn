@@ -7,6 +7,7 @@
 [ext_resource type="Script" uid="uid://dtcece7lyqaaa" path="res://scripts/input_manager.gd" id="6_7mycd"]
 [ext_resource type="PackedScene" uid="uid://csw2g32wfd03q" path="res://scenes/discard.tscn" id="6_272bh"]
 [ext_resource type="PackedScene" uid="uid://ddd4e4gfmyeeh" path="res://scenes/turn_manager.tscn" id="7_272bh"]
+[ext_resource type="PackedScene" uid="uid://b4e8dr4gfa0av" path="res://scenes/draw_pile_view.tscn" id="8_5vw27"]
 
 [sub_resource type="Gradient" id="Gradient_7mycd"]
 colors = PackedColorArray(0.564706, 0.364706, 1, 1, 1, 0.552941, 1, 1)
@@ -17,9 +18,6 @@ width = 1920
 height = 1080
 fill_from = Vector2(0.188073, 0)
 fill_to = Vector2(0.853211, 0.978593)
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_5vw27"]
-bg_color = Color(0, 0, 0, 0.854902)
 
 [node name="Main" type="Node2D"]
 
@@ -49,43 +47,6 @@ position = Vector2(1770, 890)
 
 [node name="TurnManager" parent="." instance=ExtResource("7_272bh")]
 
-[node name="DrawPileView" type="CanvasLayer" parent="."]
-visible = false
-
-[node name="ScrollContainer" type="ScrollContainer" parent="DrawPileView"]
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_5vw27")
-horizontal_scroll_mode = 0
-
-[node name="MarginContainer" type="MarginContainer" parent="DrawPileView/ScrollContainer"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_constants/margin_left = 100
-theme_override_constants/margin_top = 100
-theme_override_constants/margin_right = 100
-theme_override_constants/margin_bottom = 100
-
-[node name="GridContainer" type="GridContainer" parent="DrawPileView/ScrollContainer/MarginContainer"]
-layout_mode = 2
-size_flags_horizontal = 4
-theme_override_constants/h_separation = 25
-theme_override_constants/v_separation = 25
-columns = 4
-
-[node name="CloseDrawPile" type="Button" parent="DrawPileView"]
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -123.0
-offset_top = 16.0
-offset_right = -18.0
-offset_bottom = 83.0
-grow_horizontal = 0
-text = "Close"
+[node name="DrawPileView" parent="." instance=ExtResource("8_5vw27")]
 
 [connection signal="pressed" from="TurnManager" to="CardManager" method="_on_turn_manager_pressed"]
-[connection signal="pressed" from="DrawPileView/CloseDrawPile" to="Deck" method="_on_close_draw_pile_pressed"]

@@ -19,7 +19,6 @@ config/icon="res://assets/icon.svg"
 [autoload]
 
 CardDB="*res://scripts/CardDB.gd"
-Utils="*res://scripts/utils.gd"
 
 [display]
 
@@ -27,3 +26,7 @@ window/size/viewport_width=1920
 window/size/viewport_height=1080
 window/stretch/mode="viewport"
 window/vsync/vsync_mode=0
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/SmoothScroll/plugin.cfg")

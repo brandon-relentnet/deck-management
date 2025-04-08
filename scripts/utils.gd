@@ -1,7 +1,8 @@
 extends Node
 
+class_name Utils
+
 # This script contains utility functions that can be reused across different parts of the game
-# It should be attached to an autoload singleton node named "Utils"
 
 # Constants that might be needed in multiple places
 const DEFAULT_ANIMATION_SPEED = 0.1
