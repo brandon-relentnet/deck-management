@@ -6,6 +6,7 @@ signal left_mouse_button_released
 
 # State tracking
 var draw_pile_view_open = false
+var discard_pile_view_open = false
 
 # References to other nodes
 var card_manager_reference: Node2D
@@ -22,18 +23,24 @@ func _ready() -> void:
 	# Connect to signals
 	deck_reference.connect("draw_pile_opened", _on_draw_pile_opened)
 	deck_reference.connect("draw_pile_closed", _on_draw_pile_closed)
-
+	discard_reference.connect("discard_pile_opened", _on_discard_pile_opened)
+	discard_reference.connect("discard_pile_closed", _on_discard_pile_closed)
+	
+	
 func _on_draw_pile_opened() -> void:
 	draw_pile_view_open = true
 
 func _on_draw_pile_closed() -> void:
 	draw_pile_view_open = false
+	
+func _on_discard_pile_opened() -> void:
+	discard_pile_view_open = true
+
+func _on_discard_pile_closed() -> void:
+	discard_pile_view_open = false
 
 # Process all input events
 func _input(event: InputEvent) -> void:
-	if draw_pile_view_open:
-		return
-		
 	# Early return if this isn't a left mouse button event
 	if not (event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT):
 		return
@@ -51,7 +58,9 @@ func process_click() -> void:
 	if result.size() > 0:
 		var card_found = result[0].collider.get_parent()
 		if card_found:
-			card_manager_reference.start_drag(card_found)
+			# Don't allow dragging cards when draw pile view is open
+			if not draw_pile_view_open:
+				card_manager_reference.start_drag(card_found)
 			return
 			
 	# Then check for deck/discard
@@ -59,8 +68,33 @@ func process_click() -> void:
 	if result.size() > 0:
 		var parent_node = result[0].collider.get_parent()
 		
-		if parent_node == deck_reference:
-			deck_reference.view_draw_pile()
-		elif parent_node == discard_reference:
-			print("Viewing the discard pile")
-			# Add discard pile functionality here if needed
+		if parent_node in [deck_reference, discard_reference]:
+			var is_deck = parent_node == deck_reference
+			
+			# Get references to the relevant pile objects based on what was clicked
+			var clicked_pile = deck_reference if is_deck else discard_reference
+			var other_pile = discard_reference if is_deck else deck_reference
+			
+			# Check if the clicked pile's view is already open
+			var clicked_pile_open = draw_pile_view_open if is_deck else discard_pile_view_open
+			var other_pile_open = discard_pile_view_open if is_deck else draw_pile_view_open
+			
+			if clicked_pile_open:
+				# If clicked pile is already open, close it
+				if is_deck:
+					clicked_pile.close_draw_pile()
+				else:
+					clicked_pile.close_discard_pile()
+			else:
+				# If the other pile is open, close it first
+				if other_pile_open:
+					if is_deck:
+						other_pile.close_discard_pile()
+					else:
+						other_pile.close_draw_pile()
+				
+				# Open the clicked pile
+				if is_deck:
+					clicked_pile.view_draw_pile()
+				else:
+					clicked_pile.view_discard_pile()

@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3 uid="uid://bvm1l0sks3mxk"]
+[gd_scene load_steps=16 format=3 uid="uid://bvm1l0sks3mxk"]
 
 [ext_resource type="PackedScene" uid="uid://brakl80fqtkxy" path="res://scenes/card_slot.tscn" id="2_1bvp3"]
 [ext_resource type="Script" uid="uid://l87bixt6uy5b" path="res://scripts/card_manager.gd" id="2_h2yge"]
@@ -7,7 +7,10 @@
 [ext_resource type="Script" uid="uid://dtcece7lyqaaa" path="res://scripts/input_manager.gd" id="6_7mycd"]
 [ext_resource type="PackedScene" uid="uid://csw2g32wfd03q" path="res://scenes/discard.tscn" id="6_272bh"]
 [ext_resource type="PackedScene" uid="uid://ddd4e4gfmyeeh" path="res://scenes/turn_manager.tscn" id="7_272bh"]
-[ext_resource type="PackedScene" uid="uid://b4e8dr4gfa0av" path="res://scenes/draw_pile_view.tscn" id="8_5vw27"]
+[ext_resource type="Script" uid="uid://bgqglerkcylxx" path="res://addons/SmoothScroll/SmoothScrollContainer.gd" id="7_kek77"]
+[ext_resource type="Script" uid="uid://b7h0k2h2qwlqv" path="res://addons/SmoothScroll/scroll_damper/expo_scroll_damper.gd" id="8_4c57u"]
+[ext_resource type="Texture2D" uid="uid://ctx0154o1b8ax" path="res://assets/red-card-back.png" id="9_kek77"]
+[ext_resource type="Texture2D" uid="uid://b8vppoupuycxn" path="res://assets/red-card-front.png" id="10_4c57u"]
 
 [sub_resource type="Gradient" id="Gradient_7mycd"]
 colors = PackedColorArray(0.564706, 0.364706, 1, 1, 1, 0.552941, 1, 1)
@@ -18,6 +21,18 @@ width = 1920
 height = 1080
 fill_from = Vector2(0.188073, 0)
 fill_to = Vector2(0.853211, 0.978593)
+
+[sub_resource type="Resource" id="Resource_fdvxv"]
+script = ExtResource("8_4c57u")
+friction = 4.0
+minimum_velocity = 0.4
+rebound_strength = 7.0
+
+[sub_resource type="Resource" id="Resource_puyw0"]
+script = ExtResource("8_4c57u")
+friction = 4.0
+minimum_velocity = 0.4
+rebound_strength = 7.0
 
 [node name="Main" type="Node2D"]
 
@@ -36,9 +51,6 @@ scale = Vector2(2.5, 2.5)
 [node name="PlayerHand" type="Node2D" parent="."]
 script = ExtResource("3_1bvp3")
 
-[node name="Deck" parent="." instance=ExtResource("4_lquwl")]
-position = Vector2(150, 890)
-
 [node name="InputManager" type="Node2D" parent="."]
 script = ExtResource("6_7mycd")
 
@@ -47,6 +59,107 @@ position = Vector2(1770, 890)
 
 [node name="TurnManager" parent="." instance=ExtResource("7_272bh")]
 
-[node name="DrawPileView" parent="." instance=ExtResource("8_5vw27")]
+[node name="Deck" parent="." instance=ExtResource("4_lquwl")]
+position = Vector2(150, 890)
+
+[node name="CardPileView" type="CanvasLayer" parent="."]
+visible = false
+
+[node name="Background" type="ColorRect" parent="CardPileView"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.560784)
+
+[node name="DrawPileScroll" type="ScrollContainer" parent="CardPileView"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+horizontal_scroll_mode = 0
+script = ExtResource("7_kek77")
+wheel_scroll_damper = SubResource("Resource_fdvxv")
+dragging_scroll_damper = SubResource("Resource_puyw0")
+metadata/_custom_type_script = "uid://bgqglerkcylxx"
+
+[node name="MarginContainer" type="MarginContainer" parent="CardPileView/DrawPileScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/margin_left = 100
+theme_override_constants/margin_top = 100
+theme_override_constants/margin_right = 100
+theme_override_constants/margin_bottom = 100
+
+[node name="GridContainer" type="GridContainer" parent="CardPileView/DrawPileScroll/MarginContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_constants/h_separation = 25
+theme_override_constants/v_separation = 25
+columns = 4
+
+[node name="DiscardPileScroll" type="ScrollContainer" parent="CardPileView"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+horizontal_scroll_mode = 0
+script = ExtResource("7_kek77")
+wheel_scroll_damper = SubResource("Resource_fdvxv")
+dragging_scroll_damper = SubResource("Resource_puyw0")
+metadata/_custom_type_script = "uid://bgqglerkcylxx"
+
+[node name="MarginContainer" type="MarginContainer" parent="CardPileView/DiscardPileScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/margin_left = 100
+theme_override_constants/margin_top = 100
+theme_override_constants/margin_right = 100
+theme_override_constants/margin_bottom = 100
+
+[node name="GridContainer" type="GridContainer" parent="CardPileView/DiscardPileScroll/MarginContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_constants/h_separation = 25
+theme_override_constants/v_separation = 25
+columns = 4
+
+[node name="DrawPileSprite" type="Sprite2D" parent="CardPileView"]
+texture_filter = 1
+position = Vector2(150, 890)
+scale = Vector2(2.5, 2.5)
+texture = ExtResource("10_4c57u")
+
+[node name="DrawPileLabel" type="RichTextLabel" parent="CardPileView"]
+z_index = 2
+offset_left = 75.0
+offset_top = 775.0
+offset_right = 225.0
+offset_bottom = 1005.0
+theme_override_font_sizes/normal_font_size = 64
+text = "0"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="DiscardPileSprite" type="Sprite2D" parent="CardPileView"]
+z_index = 2
+texture_filter = 1
+position = Vector2(1770, 890)
+scale = Vector2(2.5, 2.5)
+texture = ExtResource("9_kek77")
+
+[node name="DiscardPileLabel" type="RichTextLabel" parent="CardPileView"]
+z_index = 2
+offset_left = 1695.0
+offset_top = 775.0
+offset_right = 1845.0
+offset_bottom = 1005.0
+theme_override_font_sizes/normal_font_size = 64
+text = "0"
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [connection signal="pressed" from="TurnManager" to="CardManager" method="_on_turn_manager_pressed"]

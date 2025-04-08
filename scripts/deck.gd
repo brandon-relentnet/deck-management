@@ -38,6 +38,7 @@ func _ready() -> void:
 # Updates the visual counter showing how many cards are left in the deck
 func update_deck_display() -> void:
 	$RichTextLabel.text = str(player_deck.size())
+	$"../CardPileView/DrawPileLabel".text = str(player_deck.size())
 
 # Main function to draw a card from the deck
 func draw_card() -> void:
@@ -109,11 +110,15 @@ func view_draw_pile() -> void:
 	emit_signal("draw_pile_opened")
 	
 	# Clear any existing cards in the view
-	for child in $"../DrawPileView/ScrollContainer/MarginContainer/GridContainer".get_children():
+	for child in $"../CardPileView/DrawPileScroll/MarginContainer/GridContainer".get_children():
 		child.queue_free()
 	
+	# Shuffle the array so the player doesn't know what's coming next
+	var shuffled_view_player_deck = player_deck.duplicate()
+	shuffled_view_player_deck.shuffle()
+	
 	# Create a visual representation for each card in the draw pile
-	for card_id in player_deck:
+	for card_id in shuffled_view_player_deck:
 		var new_card = card_scene.instantiate()
 		new_card.setup_from_id(card_id)
 		
@@ -128,18 +133,20 @@ func view_draw_pile() -> void:
 		# Position the card within its Control container
 		new_card.position = Vector2(60, 90)
 		
-		$"../DrawPileView/ScrollContainer/MarginContainer/GridContainer".add_child(control)
+		$"../CardPileView/DrawPileScroll/MarginContainer/GridContainer".add_child(control)
 		
 		# Disable dragging or other interactions for these preview cards
 		if new_card.has_node("Area2D"):
 			new_card.get_node("Area2D").input_pickable = false
 	
 	# Make sure the TextureRect is visible
-	$"../DrawPileView".visible = true
-
+	$"../CardPileView".visible = true
+	$"../CardPileView/DrawPileScroll".visible = true
+	
 # Close the draw pile view
 func close_draw_pile() -> void:
-	$"../DrawPileView".visible = false
+	$"../CardPileView".visible = false
+	$"../CardPileView/DrawPileScroll".visible = false
 	emit_signal("draw_pile_closed")
 
 # Move cards from discard pile back to draw pile
@@ -185,10 +192,8 @@ func move_discard_to_draw() -> void:
 	
 	# Move all cards from discard to deck array
 	while $"../Discard".discard_pile.size() > 0:
-		var card_node = $"../Discard".discard_pile.pop_back()
-		if is_instance_valid(card_node) and card_node.has_method("get") and card_node.get("card_id"):
-			player_deck.append(card_node.card_id)
-			card_node.queue_free()
+		var card_id = $"../Discard".discard_pile.pop_back()
+		player_deck.append(card_id)
 	
 	# Update displays
 	$"../Discard".update_discard_display()
@@ -199,6 +204,3 @@ func move_discard_to_draw() -> void:
 	
 	# Shuffle the deck
 	player_deck.shuffle()
-
-func _on_close_draw_pile_pressed() -> void:
-	close_draw_pile()

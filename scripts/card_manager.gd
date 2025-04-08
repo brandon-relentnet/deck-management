@@ -112,7 +112,16 @@ func move_card_to_discard(card) -> void:
 	Utils.animate_node_with_effects(card, DISCARD_PILE_POSITION, DEFAULT_CARD_MOVE_SPEED)
 	
 	var discard_pile = $"../Discard"
-	discard_pile.discard_pile.append(card)
+	# discard_pile.discard_pile.append(card)
+	discard_pile.discard_pile.append(card.card_id)
+	
+	# Wait for the animation to finish
+	await Utils.create_timer(DEFAULT_CARD_MOVE_SPEED)
+	
+	# Only queue_free after animation completes
+	if is_instance_valid(card):
+		card.queue_free()
+		
 	discard_pile.update_discard_display()
 	
 	if is_instance_valid(card):
