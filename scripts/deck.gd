@@ -1,5 +1,8 @@
 extends Node2D
 
+signal draw_pile_opened
+signal draw_pile_closed
+
 # Constants for card creation and animation
 const CARD_SCENE_PATH = "res://scenes/card.tscn"  # Path to the card scene file
 const CARD_DRAW_SPEED = 0.3                   # Animation speed when drawing a card
@@ -116,13 +119,52 @@ func spawn_card() -> void:
 	if player_deck.size() == 0:
 		disable_deck()
 
+func view_draw_pile() -> void:
+	print("Viewing the draw pile")
+	emit_signal("draw_pile_opened")
+	# First, clear any existing cards in the view
+	for child in $"../DrawPileView/ScrollContainer/MarginContainer/GridContainer".get_children():
+		child.queue_free()
+	
+	# Create a visual representation for each card in the draw pile
+	for card_id in player_deck:
+		var new_card = card_scene.instantiate()
+		new_card.setup_from_id(card_id)
+		
+		# Important: Make the card work properly in a UI container
+		# new_card.scale = Vector2(0.5, 0.5)  # Scale down the card
+		new_card.rotation_degrees = 0  # Reset rotation to avoid UI issues
+		
+		# Cards need a minimum size to render properly in HBoxContainer
+		var control = Control.new()
+		control.custom_minimum_size = Vector2(160, 240) # Adjust based on your card size
+		control.add_child(new_card)
+		
+		# Position the card within its Control container
+		new_card.position = Vector2(60, 90) # Half the minimum size
+		
+		$"../DrawPileView/ScrollContainer/MarginContainer/GridContainer".add_child(control)
+		
+		# Disable dragging or other interactions for these preview cards
+		if new_card.has_node("Area2D"):
+			new_card.get_node("Area2D").input_pickable = false
+	
+	# Make sure the TextureRect is visible
+	$"../DrawPileView".visible = true
+
+func close_draw_pile() -> void:
+	print("Closing the draw pile view")
+	$"../DrawPileView".visible = false
+	# Re-enable game clicks
+	emit_signal("draw_pile_closed")
+
 func apply_deck_shake() -> void:
 	# Create a small shake animation for the deck
 	var tween = create_tween()
 	var original_pos = position
 	
 	# Quick back-and-forth movement
-	tween.tween_property(self, "position", original_pos + Vector2(3, 0), 0.05)
+	tween.tween_property(self, "position", original_pos + Vector2(3, -3), 0.05)
 	tween.tween_property(self, "position", original_pos, 0.05)
 
 func move_discard_to_draw() -> void:
@@ -251,3 +293,7 @@ func move_discard_to_draw() -> void:
 	
 	# Shuffle the deck
 	player_deck.shuffle()
+
+
+func _on_close_draw_pile_pressed() -> void:
+	close_draw_pile()

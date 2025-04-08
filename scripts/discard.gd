@@ -8,8 +8,6 @@ func _ready():
 	# If you have a sprite for the discard pile, make sure it has a higher z-index
 	if has_node("Sprite2D"):
 		$Sprite2D.z_index = 20  # Set this to a higher value
-	elif has_node("TextureRect"):
-		$TextureRect.z_index = 20  # Alternative if using TextureRect
 	
 	# Make sure this node's z-index is also high to affect child nodes
 	z_index = 20
@@ -17,8 +15,18 @@ func _ready():
 	# Initialize the discard counter display
 	update_discard_display()
 
+func apply_discard_shake() -> void:
+	# Create a small shake animation for the deck
+	var tween = create_tween()
+	var original_pos = position
+	
+	# Quick back-and-forth movement
+	tween.tween_property(self, "position", original_pos + Vector2(3, 3), 0.05)
+	tween.tween_property(self, "position", original_pos, 0.05)
+
 # Updates the visual counter showing how many cards are in the discard pile
 func update_discard_display() -> void:
+	apply_discard_shake()
 	if has_node("RichTextLabel"):
 		$RichTextLabel.text = str(discard_pile.size())
 		# Ensure counter is visible above everything

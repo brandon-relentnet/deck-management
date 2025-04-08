@@ -12,6 +12,7 @@ var screen_size: Vector2               # Cached screen dimensions to limit card 
 var is_hovering_on_card: bool = false  # Tracks if the cursor is hovering over any card
 var player_hand_reference: Node2D      # Reference to the player's hand node
 var turn_manager: Node                # Reference to turn manager for easy access
+var input_manager: Node               # Add a reference to input manager
 
 # Called when the node enters the scene tree
 func _ready() -> void:
@@ -19,6 +20,7 @@ func _ready() -> void:
 	screen_size = get_viewport_rect().size
 	player_hand_reference = $"../PlayerHand"
 	turn_manager = $"../TurnManager"
+	input_manager = $"../InputManager"
 	
 	# Connect to input manager's mouse release signal
 	$"../InputManager".connect("left_mouse_button_released", on_left_click_released)
@@ -141,6 +143,10 @@ func on_left_click_released() -> void:
 
 # Handler for when the mouse enters a card's area
 func on_hovered_over_card(card: Node2D) -> void:
+	# Skip hover effects if draw pile view is open
+	if input_manager.draw_pile_view_open:
+		return
+		
 	# Only update if we weren't already hovering over a card
 	if not is_hovering_on_card:
 		is_hovering_on_card = true
@@ -148,6 +154,10 @@ func on_hovered_over_card(card: Node2D) -> void:
 	
 # Handler for when the mouse exits a card's area
 func on_hovered_off_card(card: Node2D) -> void:
+	# Skip hover effects if draw pile view is open
+	if input_manager.draw_pile_view_open:
+		return
+		
 	# Ignore hover-off events while dragging
 	if card_being_dragged:
 		return

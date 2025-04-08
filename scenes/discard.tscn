@@ -7,6 +7,8 @@
 size = Vector2(160, 240)
 
 [node name="Discard" type="Node2D"]
+light_mask = 32
+visibility_layer = 32
 script = ExtResource("1_m1mm0")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
@@ -15,10 +17,14 @@ scale = Vector2(2.5, 2.5)
 texture = ExtResource("2_m1mm0")
 
 [node name="Area2D" type="Area2D" parent="."]
+light_mask = 32
+visibility_layer = 32
 collision_layer = 4
 collision_mask = 4
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+light_mask = 32
+visibility_layer = 32
 shape = SubResource("RectangleShape2D_5vw27")
 
 [node name="RichTextLabel" type="RichTextLabel" parent="."]
