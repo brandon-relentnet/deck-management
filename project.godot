@@ -19,6 +19,7 @@ config/icon="res://assets/icon.svg"
 [autoload]
 
 CardDB="*res://scripts/CardDB.gd"
+Utils="*res://scripts/utils.gd"
 
 [display]
 

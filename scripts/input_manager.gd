@@ -4,16 +4,13 @@ extends Node2D
 signal left_mouse_button_clicked
 signal left_mouse_button_released
 
-# Collision mask constants for detecting different game objects
-const COLLISION_MASK_CARD = 1  # Used to identify cards
-const COLLISION_MASK_DECK = 4  # Used to identify the deck
-const COLLISION_MASK_DISCARD = 4  # Currently sharing the same mask as deck
+# State tracking
+var draw_pile_view_open = false
 
 # References to other nodes
 var card_manager_reference: Node2D
 var deck_reference: Node2D
 var discard_reference: Node2D
-var draw_pile_view_open = false
 
 # Called when the node enters the scene tree
 func _ready() -> void:
@@ -23,8 +20,8 @@ func _ready() -> void:
 	discard_reference = $"../Discard"
 	
 	# Connect to signals
-	deck_reference.connect("draw_pile_opened", Callable(self, "_on_draw_pile_opened"))
-	deck_reference.connect("draw_pile_closed", Callable(self, "_on_draw_pile_closed"))
+	deck_reference.connect("draw_pile_opened", _on_draw_pile_opened)
+	deck_reference.connect("draw_pile_closed", _on_draw_pile_closed)
 
 func _on_draw_pile_opened() -> void:
 	draw_pile_view_open = true
@@ -42,48 +39,28 @@ func _input(event: InputEvent) -> void:
 		return
 	
 	if event.pressed:
-		# Handle mouse button down
 		emit_signal("left_mouse_button_clicked")
-		raycast_at_cursor()
+		process_click()
 	else:
-		# Handle mouse button up
 		emit_signal("left_mouse_button_released")
 			
-func set_draw_pile_view_state(is_open: bool) -> void:
-	draw_pile_view_open = is_open
-	
-# Detect and handle objects under the cursor when mouse is clicked
-func raycast_at_cursor() -> void:
-	# Set up the physics query
-	var space_state = get_world_2d().direct_space_state
-	var parameters = PhysicsPointQueryParameters2D.new()
-	parameters.position = get_global_mouse_position()
-	parameters.collide_with_areas = true
-	
-	# Perform the raycast
-	var result = space_state.intersect_point(parameters)
-	
-	# Early return if nothing was hit
-	if result.size() == 0:
-		return
-	
-	# Get the collision object and its parent node
-	var collider = result[0].collider
-	var parent_node = collider.get_parent()
-	
-	# Check what type of object was clicked by comparing with actual node references
-	if collider.collision_mask == COLLISION_MASK_CARD:
-		# Handle card click
-		var card_found = parent_node
+# Handle mouse clicks on game objects
+func process_click() -> void:
+	# First check for cards - they have higher priority
+	var result = Utils.raycast_check_for_object(get_world_2d(), get_global_mouse_position(), Utils.CARD_COLLISION_MASK)
+	if result.size() > 0:
+		var card_found = result[0].collider.get_parent()
 		if card_found:
 			card_manager_reference.start_drag(card_found)
-	elif collider.collision_mask == COLLISION_MASK_DECK:
-		# Now we need to determine if this is the deck or discard pile
+			return
+			
+	# Then check for deck/discard
+	result = Utils.raycast_check_for_object(get_world_2d(), get_global_mouse_position(), Utils.DECK_DISCARD_COLLISION_MASK)
+	if result.size() > 0:
+		var parent_node = result[0].collider.get_parent()
+		
 		if parent_node == deck_reference:
-			# This is the actual deck - handle deck click
-			# deck_reference.draw_card()
 			deck_reference.view_draw_pile()
 		elif parent_node == discard_reference:
-			# This is the discard pile
 			print("Viewing the discard pile")
 			# Add discard pile functionality here if needed

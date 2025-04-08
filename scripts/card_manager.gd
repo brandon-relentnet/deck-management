@@ -1,18 +1,15 @@
 extends Node2D
 
-# Collision mask constants for physics interactions
-const COLLISION_MASK_CARD = 1      # Used for detecting cards
-const COLLISION_MASK_CARD_SLOT = 2 # Used for detecting card slots
-const DEFAULT_CARD_MOVE_SPEED = 0.1 # Default animation speed for card movement
+const DEFAULT_CARD_MOVE_SPEED = 0.1
 const DISCARD_PILE_POSITION = Vector2(1770, 890)
 
 # State variables
-var card_being_dragged: Node2D = null  # Reference to the card currently being dragged
-var screen_size: Vector2               # Cached screen dimensions to limit card movement
-var is_hovering_on_card: bool = false  # Tracks if the cursor is hovering over any card
-var player_hand_reference: Node2D      # Reference to the player's hand node
-var turn_manager: Node                # Reference to turn manager for easy access
-var input_manager: Node               # Add a reference to input manager
+var card_being_dragged: Node2D = null
+var screen_size: Vector2
+var is_hovering_on_card: bool = false
+var player_hand_reference: Node2D
+var turn_manager: Node
+var input_manager: Node
 
 # Called when the node enters the scene tree
 func _ready() -> void:
@@ -23,11 +20,10 @@ func _ready() -> void:
 	input_manager = $"../InputManager"
 	
 	# Connect to input manager's mouse release signal
-	$"../InputManager".connect("left_mouse_button_released", on_left_click_released)
+	input_manager.connect("left_mouse_button_released", on_left_click_released)
 
 # Called every frame
 func _process(_delta: float) -> void:
-	# Early return if no card is being dragged - optimization to avoid unnecessary processing
 	if not card_being_dragged:
 		return
 	
@@ -41,7 +37,8 @@ func _process(_delta: float) -> void:
 # Begin dragging a card
 func start_drag(card: Node2D) -> void:
 	card_being_dragged = card
-	set_card_scale(card, false) # Reset scale to normal when dragging
+	card.is_being_dragged = true
+	set_card_scale(card, false)
 
 # Finish dragging a card and determine where it should go
 func finish_drag() -> void:
@@ -49,20 +46,26 @@ func finish_drag() -> void:
 		card_being_dragged = null
 		return
 		
-	set_card_scale(card_being_dragged, true) # Slightly enlarge the card for visual feedback
+	set_card_scale(card_being_dragged, true)
 	
 	# Check if the card is over a valid card slot
 	var card_slot = raycast_check_for_card_slot()
 	
 	# Try to play the card if conditions are met
 	if try_play_card(card_slot):
-		# Card was played successfully - handled in the play_card function
+		# Card was played successfully
 		pass
 	else:
-		# Return card to hand if not placed in a slot
-		player_hand_reference.add_card_to_hand(card_being_dragged, DEFAULT_CARD_MOVE_SPEED)
+		# Important: First check if card is already in the hand before returning it
+		if card_being_dragged in player_hand_reference.player_hand:
+			# If already in hand, just animate it back to its stored position
+			Utils.animate_node_with_effects(card_being_dragged, card_being_dragged.hand_position, DEFAULT_CARD_MOVE_SPEED)
+		else:
+			# Only add to hand if it's not already there
+			player_hand_reference.add_card_to_hand(card_being_dragged, DEFAULT_CARD_MOVE_SPEED)
 	
-	# Clear dragging reference
+	# Reset the card's dragging state before clearing reference
+	card_being_dragged.is_being_dragged = false
 	card_being_dragged = null
 
 # Attempts to play a card in a slot. Returns true if successful
@@ -100,14 +103,13 @@ func try_play_card(card_slot) -> bool:
 
 # Move a card to the discard pile
 func move_card_to_discard(card) -> void:
-	print("moving card to discard pile")
 	if !is_instance_valid(card):
 		return
 		
 	# Ensure the card is visually below the discard pile
 	card.z_index = -1
 		
-	player_hand_reference.animate_card_to_position_with_effects(card, DISCARD_PILE_POSITION, DEFAULT_CARD_MOVE_SPEED)
+	Utils.animate_node_with_effects(card, DISCARD_PILE_POSITION, DEFAULT_CARD_MOVE_SPEED)
 	
 	var discard_pile = $"../Discard"
 	discard_pile.discard_pile.append(card)
@@ -123,13 +125,9 @@ func move_hand_to_discard() -> void:
 	
 	for card in cards_to_discard:
 		move_card_to_discard(card)
-		await create_timer(DEFAULT_CARD_MOVE_SPEED)
+		await Utils.create_timer(DEFAULT_CARD_MOVE_SPEED)
 	
 	player_hand_reference.clear_hand()
-
-# Convenience function for creating timers
-func create_timer(duration: float):
-	return get_tree().create_timer(duration).timeout
 		
 # Connect signals from newly created cards to this manager
 func connect_card_signals(card: Node2D) -> void:
@@ -185,51 +183,19 @@ func set_card_scale(card: Node2D, is_enlarged: bool) -> void:
 
 # Convenience wrapper for checking for card slots at the current mouse position
 func raycast_check_for_card_slot() -> Node2D:
-	return raycast_check_for_object(COLLISION_MASK_CARD_SLOT)
+	var result = Utils.raycast_check_for_object(get_world_2d(), get_global_mouse_position(), Utils.CARD_SLOT_COLLISION_MASK)
+	if result.size() > 0:
+		return result[0].collider.get_parent()
+	return null
 
 # Convenience wrapper for checking for cards at the current mouse position
 func raycast_check_for_card() -> Node2D:
-	var result = raycast_check_for_object(COLLISION_MASK_CARD)
+	var result = Utils.raycast_check_for_object(get_world_2d(), get_global_mouse_position(), Utils.CARD_COLLISION_MASK)
 	if not result or result.size() == 0:
 		return null
 	
 	# If multiple cards are under the cursor, get the one with highest z-index (visually on top)
-	return get_card_with_highest_z_index(result)
-
-# Generic function for detecting objects at the mouse position with a specific collision mask
-func raycast_check_for_object(collision_mask: int):
-	# Set up the physics query
-	var space_state = get_world_2d().direct_space_state
-	var parameters = PhysicsPointQueryParameters2D.new()
-	parameters.position = get_global_mouse_position()
-	parameters.collide_with_areas = true
-	parameters.collision_mask = collision_mask
-	
-	# Perform the raycast
-	var result = space_state.intersect_point(parameters)
-	
-	if result.size() > 0:
-		# For card slots, return the parent node directly
-		if collision_mask == COLLISION_MASK_CARD_SLOT:
-			return result[0].collider.get_parent()
-		# For cards, return the whole result array for z-index sorting
-		return result
-	return null
-	
-# From an array of physics results, find the card with the highest z-index
-func get_card_with_highest_z_index(cards: Array) -> Node2D:
-	# Start with the first card as our candidate
-	var highest_z_card = cards[0].collider.get_parent()
-	var highest_z_index = highest_z_card.z_index
-	
-	# Check all other cards
-	for i in range(1, cards.size()):
-		var current_card = cards[i].collider.get_parent()
-		if current_card.z_index > highest_z_index:
-			highest_z_card = current_card
-			highest_z_index = current_card.z_index
-	
-	return highest_z_card
+	return Utils.get_object_with_highest_z_index(result)
 
 # Handle ending the player's turn
 func _on_turn_manager_pressed() -> void:
@@ -239,7 +205,7 @@ func _on_turn_manager_pressed() -> void:
 	var player_hand_size = player_hand_reference.player_hand.size()
 	if player_hand_size > 0:
 		move_hand_to_discard()
-		await create_timer(DEFAULT_CARD_MOVE_SPEED * player_hand_size)
+		await Utils.create_timer(DEFAULT_CARD_MOVE_SPEED * player_hand_size)
 	
 	# Draw new hand and reset energy
 	$"../Deck".draw_hand($"../Deck".CURRENT_HAND_DRAW)

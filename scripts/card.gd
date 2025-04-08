@@ -1,11 +1,11 @@
 extends Node2D
 
-# Signals emitted when mouse enters or leaves the card area
-signal hovered(card)      # Sent when mouse enters card area
-signal hovered_off(card)  # Sent when mouse exits card area
+# Signals
+signal hovered(card)
+signal hovered_off(card)
 
 # Core properties
-var card_id: String = ""   # Unique identifier that links to card database
+var card_id: String = ""
 var energy: int = 0
 var card_name: String = ""
 
@@ -15,7 +15,7 @@ var is_being_dragged: bool = false
 
 # Called when the node enters the scene tree
 func _ready() -> void:
-	# Register this card with the card manager to handle signals
+	# Register card signals with the card manager
 	if get_parent().has_method("connect_card_signals"):
 		get_parent().connect_card_signals(self)
 	
@@ -45,18 +45,16 @@ func setup_from_id(id: String) -> void:
 	
 	if has_node("EnergyLabel"):
 		$EnergyLabel.text = str(energy)
-	
-	# Additional setup can go here (e.g., setting textures, effects, etc.)
 
-# Called when the mouse enters the card's collision area
+# Mouse entered card area
 func _on_area_2d_mouse_entered() -> void:
 	emit_signal("hovered", self)
 
-# Called when the mouse exits the card's collision area
+# Mouse exited card area
 func _on_area_2d_mouse_exited() -> void:
 	emit_signal("hovered_off", self)
 
-# Called when input occurs in the card's area
+# Input event in card area
 func _on_area_2d_input_event(_viewport, event, _shape_idx):
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 		if event.pressed:
