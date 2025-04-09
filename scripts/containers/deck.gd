@@ -1,7 +1,10 @@
 extends Node2D
 
+# Signals
 signal draw_pile_opened
 signal draw_pile_closed
+signal card_drawn(card)
+signal deck_shuffled
 
 # Constants for card creation and animation
 const CARD_SCENE_PATH = "res://scenes/card.tscn"
@@ -25,16 +28,29 @@ var player_deck = [
 var card_scene = preload(CARD_SCENE_PATH)
 var currently_drawing_a_card: bool = false
 
+# References to other nodes (set in _ready)
+var discard: Node2D
+var player_hand: Node2D
+
 # Called when the node enters the scene tree
 func _ready() -> void:
+	# Get references to required nodes
+	discard = $"../Discard"
+	player_hand = $"../PlayerHand"
+	
 	# Shuffle the deck at the start of the game
-	player_deck.shuffle()
+	shuffle_deck()
 	
 	# Draw initial hand
 	draw_hand(CURRENT_HAND_DRAW)
 	
 	# Initialize the deck counter display
 	update_deck_display()
+
+# Shuffles the deck
+func shuffle_deck() -> void:
+	player_deck.shuffle()
+	emit_signal("deck_shuffled")
 
 # Updates the visual counter showing how many cards are left in the deck
 func update_deck_display() -> void:
@@ -43,11 +59,11 @@ func update_deck_display() -> void:
 # Main function to draw a card from the deck
 func draw_card() -> void:
 	# Safety check: don't try to draw from an empty deck or if hand is full
-	if $"../PlayerHand".player_hand.size() >= 8:
+	if player_hand.player_hand.size() >= 8:
 		return
 	
 	# Check if deck is empty and needs to refresh from discard
-	if player_deck.size() == 0 and $"../Discard".discard_pile.size() > 0:
+	if player_deck.size() == 0 and discard.discard_pile.size() > 0:
 		await move_discard_to_draw()
 	
 	# If deck is still empty after trying to refresh, just return
@@ -62,13 +78,13 @@ func draw_hand(cards_to_draw) -> void:
 	currently_drawing_a_card = true
 	
 	# First check if we need to refresh the deck before drawing
-	if player_deck.size() == 0 and $"../Discard".discard_pile.size() > 0:
+	if player_deck.size() == 0 and discard.discard_pile.size() > 0:
 		await move_discard_to_draw()
 	
 	# Now draw the cards one by one
 	for i in cards_to_draw:
 		# Only try to draw if we have cards left
-		if player_deck.size() > 0 or $"../Discard".discard_pile.size() > 0:
+		if player_deck.size() > 0 or discard.discard_pile.size() > 0:
 			await Utils.create_timer(CARD_DRAW_SPEED * 0.5)
 			await draw_card()
 	
@@ -77,6 +93,10 @@ func draw_hand(cards_to_draw) -> void:
 
 # Creates a new card instance and adds it to the player's hand
 func spawn_card() -> void:
+	# Safety check
+	if player_deck.size() == 0:
+		return
+		
 	# Take the first card ID from the deck
 	var card_id = player_deck[0]
 	player_deck.erase(card_id)
@@ -97,19 +117,22 @@ func spawn_card() -> void:
 	new_card.modulate.a = 0.7
 	
 	# Add the card to the player's hand with animation
-	$"../PlayerHand".add_card_to_hand_with_effects(new_card, CARD_DRAW_SPEED)
+	player_hand.add_card_to_hand_with_effects(new_card, CARD_DRAW_SPEED)
 	
 	# Add a subtle shake effect to the deck when drawing
 	Utils.apply_shake_effect(self)
 	
 	# Update the deck counter
 	update_deck_display()
+	
+	# Emit signal that a card was drawn
+	emit_signal("card_drawn", new_card)
 
-# Show the draw pile view UI (now uses CardPileUtils)
+# Show the draw pile view UI
 func view_draw_pile() -> void:
 	CardPileUtils.view_pile(self, card_scene, player_deck, true)
 	
-# Close the draw pile view (now uses CardPileUtils)
+# Close the draw pile view
 func close_draw_pile() -> void:
 	CardPileUtils.close_pile(self, true)
 
@@ -121,11 +144,21 @@ func move_discard_to_draw() -> void:
 	const CARDS_PER_ROW = 5
 	
 	# Get positions for animation
-	var discard_position = $"../Discard".global_position
+	var discard_position = discard.global_position
 	var deck_position = global_position
 	
+	# Get all cards from discard
+	var cards_to_move = []
+	if discard.has_method("take_all_cards"):
+		cards_to_move = discard.take_all_cards()
+	else:
+		# Fallback if method doesn't exist
+		cards_to_move = discard.discard_pile.duplicate()
+		discard.discard_pile.clear()
+		discard.update_discard_display()
+	
 	# Store the number of cards to move
-	var card_count = $"../Discard".discard_pile.size()
+	var card_count = cards_to_move.size()
 	if card_count == 0:
 		return
 	
@@ -154,17 +187,14 @@ func move_discard_to_draw() -> void:
 		# Setup automatic deletion after animation completes
 		tween.tween_callback(card_visual.queue_free)
 	
-	# Move all cards from discard to deck array
-	while $"../Discard".discard_pile.size() > 0:
-		var card_id = $"../Discard".discard_pile.pop_back()
-		player_deck.append(card_id)
+	# Add all cards to the deck
+	player_deck.append_array(cards_to_move)
 	
 	# Update displays
-	$"../Discard".update_discard_display()
 	update_deck_display()
 	
 	# Wait for the animation to complete
 	await Utils.create_timer(ANIMATION_DURATION + (card_count * CARD_OFFSET) + 0.2)
 	
 	# Shuffle the deck
-	player_deck.shuffle()
+	shuffle_deck()

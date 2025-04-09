@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://ddd4e4gfmyeeh"]
 
-[ext_resource type="Script" uid="uid://b654gecfuc454" path="res://scripts/turn_manager.gd" id="1_3c2a3"]
+[ext_resource type="Script" uid="uid://b654gecfuc454" path="res://scripts/core/turn_manager.gd" id="1_3c2a3"]
 
 [node name="TurnManager" type="Button"]
 offset_left = 1702.0

@@ -3,20 +3,22 @@ extends Node2D
 # Signals for mouse button events
 signal left_mouse_button_clicked
 signal left_mouse_button_released
+signal pile_view_toggled(pile_type, is_open)
+
+# Enum for pile types
+enum PileType { DRAW, DISCARD }
 
 # State tracking
 var draw_pile_view_open = false
 var discard_pile_view_open = false
 
 # References to other nodes
-var card_manager_reference: Node2D
 var deck_reference: Node2D
 var discard_reference: Node2D
 
 # Called when the node enters the scene tree
 func _ready() -> void:
 	# Get references to required nodes
-	card_manager_reference = $"../CardManager"
 	deck_reference = $"../Deck"
 	discard_reference = $"../Discard"
 	
@@ -26,17 +28,22 @@ func _ready() -> void:
 	discard_reference.connect("discard_pile_opened", _on_discard_pile_opened)
 	discard_reference.connect("discard_pile_closed", _on_discard_pile_closed)
 	
+# Event handlers for pile view state changes
 func _on_draw_pile_opened() -> void:
 	draw_pile_view_open = true
+	emit_signal("pile_view_toggled", PileType.DRAW, true)
 
 func _on_draw_pile_closed() -> void:
 	draw_pile_view_open = false
+	emit_signal("pile_view_toggled", PileType.DRAW, false)
 	
 func _on_discard_pile_opened() -> void:
 	discard_pile_view_open = true
+	emit_signal("pile_view_toggled", PileType.DISCARD, true)
 
 func _on_discard_pile_closed() -> void:
 	discard_pile_view_open = false
+	emit_signal("pile_view_toggled", PileType.DISCARD, false)
 
 # Process all input events
 func _input(event: InputEvent) -> void:
@@ -52,18 +59,8 @@ func _input(event: InputEvent) -> void:
 			
 # Handle mouse clicks on game objects
 func process_click() -> void:
-	# First check for cards - they have higher priority
-	var result = Utils.raycast_check_for_object(get_world_2d(), get_global_mouse_position(), Utils.CARD_COLLISION_MASK)
-	if result.size() > 0:
-		var card_found = result[0].collider.get_parent()
-		if card_found:
-			# Don't allow dragging cards when any pile view is open
-			if not draw_pile_view_open and not discard_pile_view_open:
-				card_manager_reference.start_drag(card_found)
-			return
-			
-	# Then check for deck/discard
-	result = Utils.raycast_check_for_object(get_world_2d(), get_global_mouse_position(), Utils.DECK_DISCARD_COLLISION_MASK)
+	# First check for deck/discard since those can toggle a view
+	var result = Utils.raycast_check_for_object(get_world_2d(), get_global_mouse_position(), Utils.DECK_DISCARD_COLLISION_MASK)
 	if result.size() > 0:
 		var parent_node = result[0].collider.get_parent()
 		
@@ -98,3 +95,13 @@ func process_click() -> void:
 					clicked_pile.view_draw_pile()
 				else:
 					clicked_pile.view_discard_pile()
+					
+			# Found and processed a pile click, so we're done
+			return
+			
+	# If we get here, the click wasn't on a pile
+	# Check if we need to close any open pile views
+	if draw_pile_view_open:
+		deck_reference.close_draw_pile()
+	elif discard_pile_view_open:
+		discard_reference.close_discard_pile()

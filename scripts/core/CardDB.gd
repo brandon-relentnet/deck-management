@@ -1,5 +1,4 @@
 extends Node
-
 # This script acts as a database/registry for all card types
 # It should be attached to an autoload singleton node named "CardDB"
 
@@ -84,6 +83,24 @@ func get_card_data(card_id: String) -> Dictionary:
 func get_all_card_ids() -> Array:
 	return card_registry.keys()
 
+# Function to get all cards of a specific energy cost
+func get_cards_by_energy(energy_cost: int) -> Array:
+	var result = []
+	for card_id in card_registry:
+		var card = card_registry[card_id]
+		if card.energy == energy_cost:
+			result.append(card_id)
+	return result
+
+# Function to get all cards that have a specific effect
+func get_cards_by_effect(effect_name: String) -> Array:
+	var result = []
+	for card_id in card_registry:
+		var card = card_registry[card_id]
+		if card.has("effects") and effect_name in card.effects:
+			result.append(card_id)
+	return result
+
 # Function to create a card ID from name and energy
 # Useful when constructing a deck
 func create_card_id(card_name: String, card_energy: int) -> String:
@@ -93,3 +110,17 @@ func create_card_id(card_name: String, card_energy: int) -> String:
 	else:
 		push_error("Cannot create card ID - no card found with name " + card_name + " and energy " + str(card_energy))
 		return ""
+
+# Function to validate if a card is registered
+func is_valid_card_id(card_id: String) -> bool:
+	return card_registry.has(card_id)
+
+# Function to create a starter deck
+func create_starter_deck() -> Array:
+	return [
+		"power_1", "power_1", "power_1",
+		"skill_1", "skill_1", "skill_1", 
+		"skill_2",
+		"core_1", "core_1", "core_1",
+		"temp_1", "temp_1"
+	]
