@@ -8,7 +8,7 @@ signal deck_shuffled
 
 # Constants for card creation and animation
 const CARD_SCENE_PATH = "res://scenes/card.tscn"
-const CARD_DRAW_SPEED = 0.3
+const CARD_DRAW_SPEED = Utils.DEFAULT_ANIMATION_SPEED
 const CURRENT_HAND_DRAW = 5
 
 # Deck contents - stored as card IDs that reference the card database
@@ -139,7 +139,7 @@ func close_draw_pile() -> void:
 # Move cards from discard pile back to draw pile
 func move_discard_to_draw() -> void:
 	# Animation constants
-	const ANIMATION_DURATION = 0.3
+	const ANIMATION_DURATION = Utils.DEFAULT_ANIMATION_SPEED
 	const CARD_OFFSET = 0.015
 	const CARDS_PER_ROW = 5
 	

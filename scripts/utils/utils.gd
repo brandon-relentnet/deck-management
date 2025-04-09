@@ -5,7 +5,7 @@ class_name Utils
 # This script contains utility functions that can be reused across different parts of the game
 
 # Constants that might be needed in multiple places
-const DEFAULT_ANIMATION_SPEED = 0.1
+const DEFAULT_ANIMATION_SPEED = 0.3
 const CARD_COLLISION_MASK = 1
 const CARD_SLOT_COLLISION_MASK = 2
 const DECK_DISCARD_COLLISION_MASK = 4

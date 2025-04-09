@@ -1,5 +1,6 @@
 extends Button
 
+const NEW_PLAYER_ENERGY: int = 3
 var player_energy: int = 3
 
 func _process(_delta) -> void:

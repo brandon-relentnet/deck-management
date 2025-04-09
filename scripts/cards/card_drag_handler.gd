@@ -1,7 +1,8 @@
 extends Node2D
 
 # Constants
-const DEFAULT_CARD_MOVE_SPEED = 0.1
+const DEFAULT_CARD_MOVE_SPEED = Utils.DEFAULT_ANIMATION_SPEED
+const DRAG_SMOOTHING = 20.0  # Higher = less lag, lower = more lag
 
 # Signal for starting and stopping card drag
 signal drag_started(card)
@@ -46,15 +47,21 @@ func _ready() -> void:
 			push_error("InputManager missing expected signal 'left_mouse_button_released'")
 
 # Called every frame
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
 	if not card_being_dragged:
 		return
 	
-	# Update the dragged card's position to follow the mouse, but stay within screen boundaries
+	# Get the target position (mouse position with screen boundaries)
 	var mouse_pos = get_global_mouse_position()
-	card_being_dragged.position = Vector2(
+	var target_position = Vector2(
 		clamp(mouse_pos.x, 0, screen_size.x), 
 		clamp(mouse_pos.y, 0, screen_size.y)
+	)
+	
+	# Smoothly move the card toward the target position
+	card_being_dragged.position = card_being_dragged.position.lerp(
+		target_position, 
+		min(1.0, DRAG_SMOOTHING * delta)
 	)
 
 # Begin dragging a card

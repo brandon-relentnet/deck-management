@@ -70,12 +70,12 @@ func setup_from_id(id: String) -> void:
 		else:
 			# Otherwise use default card front
 			$CardImage.texture = load(default_card_front)
-			
+
 	# Update card icon if it exists
 	if has_node("CardIcon") and card_data.has("icon"):
 		$CardIcon.texture = load(card_data.icon)
 		$CardIcon.visible = true
-		
+
 	if has_node("EffectLabel") and card_data.has("effect_amount"):
 		$EffectLabel.text = str(card_data.effect_amount)
 		$EffectLabel.visible = true
@@ -96,8 +96,8 @@ func _on_area_2d_input_event(_viewport, event, _shape_idx) -> void:
 		if not turn_manager:
 			return
 			
-		if turn_manager.player_energy < energy:
-			return
+		#if turn_manager.player_energy < energy:
+			#return
 		
 		# Try to start drag directly through card manager
 		var card_manager = get_node_or_null("/root/Main/CardManager") 

@@ -2,7 +2,7 @@ extends Node2D
 class_name CardPlayHandler
 
 # Constants
-const DEFAULT_CARD_MOVE_SPEED = 0.1
+const DEFAULT_CARD_MOVE_SPEED = Utils.DEFAULT_ANIMATION_SPEED
 const DISCARD_PILE_POSITION = Vector2(1770, 890)
 
 # Signal for when a card is successfully played
@@ -67,33 +67,30 @@ func try_play_card(card: Node2D, card_slot: Node2D) -> bool:
 	emit_signal("card_played", card)
 	
 	# Move to discard
-	move_card_to_discard(card_slot.played_card)
+	move_card_to_discard(card_slot.played_card, DEFAULT_CARD_MOVE_SPEED / 2)
 	card_slot.card_in_slot = false
 	
 	return true
 
 # Move a card to the discard pile
-func move_card_to_discard(card: Node2D) -> void:
+func move_card_to_discard(card: Node2D, speed: float) -> void:
+	print("cph.gd: move_card_to_discard")
 	if !is_instance_valid(card):
 		return
 		
 	# Ensure the card is visually below the discard pile
 	card.z_index = -1
 		
-	Utils.animate_node_with_effects(card, DISCARD_PILE_POSITION, DEFAULT_CARD_MOVE_SPEED)
+	Utils.animate_node_with_effects(card, DISCARD_PILE_POSITION, speed)
 	
 	# Add to discard pile
-	if discard_pile.has_method("add_to_discard"):
-		discard_pile.add_to_discard(card.card_id)
-	else:
-		# Fallback if method doesn't exist
-		discard_pile.discard_pile.append(card.card_id)
+	discard_pile.discard_pile.append(card.card_id)
 	
 	# Emit signal that card was discarded
 	emit_signal("card_discarded", card)
 	
 	# Wait for the animation to finish
-	await Utils.create_timer(DEFAULT_CARD_MOVE_SPEED)
+	await Utils.create_timer(DEFAULT_CARD_MOVE_SPEED / 2)
 	
 	# Only queue_free after animation completes
 	if is_instance_valid(card):
@@ -110,8 +107,8 @@ func discard_hand() -> void:
 	cards_to_discard.reverse()
 	
 	for card in cards_to_discard:
-		move_card_to_discard(card)
-		await Utils.create_timer(DEFAULT_CARD_MOVE_SPEED)
+		move_card_to_discard(card, (DEFAULT_CARD_MOVE_SPEED / 2))
+		await Utils.create_timer(DEFAULT_CARD_MOVE_SPEED / 2)
 	
 	player_hand.clear_hand()
 
@@ -123,9 +120,9 @@ func end_turn() -> void:
 	var player_hand_size = player_hand.player_hand.size()
 	if player_hand_size > 0:
 		discard_hand()
-		await Utils.create_timer(DEFAULT_CARD_MOVE_SPEED * player_hand_size)
+		await Utils.create_timer((DEFAULT_CARD_MOVE_SPEED / 2) * player_hand_size)
 	
 	# Draw new hand and reset energy
 	deck.draw_hand(deck.CURRENT_HAND_DRAW)
-	turn_manager.player_energy = 3
+	turn_manager.player_energy = turn_manager.NEW_PLAYER_ENERGY
 	turn_manager.update_player_energy_label()

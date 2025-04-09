@@ -6,7 +6,7 @@ enum PileType {DRAW, DISCARD}
 static func update_display(pile_node: Node2D, count: int) -> void:
 	# Apply shake effect when cards are added/removed
 	Utils.apply_shake_effect(pile_node)
-
+	print("applied shake effect")
 	# Update the text in the relevant labels
 	if pile_node.has_node("RichTextLabel"):
 		pile_node.get_node("RichTextLabel").text = str(count)
