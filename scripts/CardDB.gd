@@ -87,7 +87,7 @@ func get_all_card_ids() -> Array:
 # Function to create a card ID from name and energy
 # Useful when constructing a deck
 func create_card_id(card_name: String, card_energy: int) -> String:
-	var id = name.to_lower() + "_" + str(card_energy)
+	var id = card_name.to_lower() + "_" + str(card_energy)
 	if card_registry.has(id):
 		return id
 	else:

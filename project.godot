@@ -19,6 +19,7 @@ config/icon="res://assets/icon.svg"
 [autoload]
 
 CardDB="*res://scripts/CardDB.gd"
+CardEffects="*res://scripts/card_effects.gd"
 
 [display]
 

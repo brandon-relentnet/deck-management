@@ -78,20 +78,20 @@ func try_play_card(card_slot) -> bool:
 	var card_energy_cost = card_being_dragged.energy
 	if turn_manager.player_energy < card_energy_cost:
 		return false
-		
-	# Access effect amount and effects array from the card
-	var card_effects = card_being_dragged.effects
-	var card_effect_amount = card_being_dragged.effect_amount
 	
-	print("card effects: ", card_effects)
-	print("effect amount: ", card_effect_amount)
+	# Create game_state dictionary to pass to CardEffects
+	var game_state = {
+		"deck": $"../Deck",
+		"turn_manager": turn_manager,
+		"player_hand": player_hand_reference,
+		# Add other game state references as needed:
+		# "enemy_manager": $"../EnemyManager",
+		# "player_stats": $"../PlayerStats",
+	}
 	
-	for effect in card_effects:
-		match effect:
-			"draw_card":
-				print("Drawing ", card_effect_amount, " card(s)")
-				$"../Deck".draw_hand(card_effect_amount)
-		
+	# Process all card effects using the new CardEffects system
+	CardEffects.process_card_effects(card_being_dragged, game_state)
+	
 	# All requirements met, play the card
 	player_hand_reference.remove_card_from_hand(card_being_dragged)
 	card_being_dragged.position = card_slot.position
