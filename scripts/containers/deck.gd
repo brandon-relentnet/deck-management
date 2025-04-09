@@ -107,6 +107,9 @@ func spawn_card() -> void:
 	# Set up the card with data from the card database
 	new_card.setup_from_id(card_id)
 	
+	# Pass references to required systems
+	new_card.init($"../CardManager", $"../TurnManager")
+	
 	# Add the card to the card manager for proper tracking
 	$"../CardManager".add_child(new_card)
 	new_card.name = "Card_" + card_id

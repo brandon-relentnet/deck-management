@@ -74,7 +74,6 @@ func try_play_card(card: Node2D, card_slot: Node2D) -> bool:
 
 # Move a card to the discard pile
 func move_card_to_discard(card: Node2D, speed: float) -> void:
-	print("cph.gd: move_card_to_discard")
 	if !is_instance_valid(card):
 		return
 		

@@ -1,5 +1,4 @@
 extends Node2D
-
 # Signals
 signal hovered(card)
 signal hovered_off(card)
@@ -8,6 +7,8 @@ signal hovered_off(card)
 var card_id: String = ""
 var energy: int = 0
 var card_name: String = ""
+var card_manager: Node2D = null
+var turn_manager: Node = null
 
 # Effect properties
 var effects: Array = []
@@ -20,14 +21,18 @@ var is_being_dragged: bool = false
 # Default card front texture path
 var default_card_front = "res://assets/card-front-default.png"
 
-# Called when the node enters the scene tree
-func _ready() -> void:
-	# Register card signals with the card manager
-	var card_manager = get_node_or_null("/root/Main/CardManager")
+func init(cm: Node2D, tm: Node) -> void:
+	card_manager = cm
+	turn_manager = tm
+	
+	# Connect signals immediately if we have the card manager
 	if card_manager and card_manager.has_method("connect_card_signals"):
 		card_manager.connect_card_signals(self)
-	
-	# Ensure input event is connected
+
+# Called when the node enters the scene tree
+func _ready() -> void:
+	# No need to look for CardManager here anymore, as we're using the injected reference
+	# Just connect the input event and set up visual properties
 	$Area2D.input_event.connect(_on_area_2d_input_event)
 	
 	# Set up initial visual properties
@@ -91,16 +96,14 @@ func _on_area_2d_mouse_exited() -> void:
 # Input event in card area
 func _on_area_2d_input_event(_viewport, event, _shape_idx) -> void:
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
-		# Check if player has enough energy
-		var turn_manager = get_node_or_null("/root/Main/TurnManager")
+		# Use the injected turn_manager reference instead of trying to find it
 		if not turn_manager:
 			return
 			
 		#if turn_manager.player_energy < energy:
 			#return
 		
-		# Try to start drag directly through card manager
-		var card_manager = get_node_or_null("/root/Main/CardManager") 
+		# Use the injected card_manager reference
 		if card_manager and card_manager.has_method("start_drag"):
 			card_manager.start_drag(self)
 			is_being_dragged = true

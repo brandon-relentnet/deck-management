@@ -53,6 +53,7 @@ func _input(event: InputEvent) -> void:
 	
 	if event.pressed:
 		emit_signal("left_mouse_button_clicked")
+		print("left mouse pressed")
 		process_click()
 	else:
 		emit_signal("left_mouse_button_released")

@@ -1,0 +1,61 @@
+[gd_scene load_steps=13 format=3 uid="uid://bvm1l0sks3mxk"]
+
+[ext_resource type="Script" uid="uid://l87bixt6uy5b" path="res://scripts/cards/card_manager.gd" id="1_ivc5l"]
+[ext_resource type="PackedScene" uid="uid://brakl80fqtkxy" path="res://scenes/card_slot.tscn" id="2_4egrv"]
+[ext_resource type="Script" uid="uid://d21fogr4y6d5n" path="res://scripts/containers/player_hand.gd" id="3_lo7sj"]
+[ext_resource type="Script" uid="uid://cxmut8r18e82m" path="res://scripts/cards/card_drag_handler.gd" id="4_pa47b"]
+[ext_resource type="Script" uid="uid://hvje1v3gg42j" path="res://scripts/cards/card_play_handler.gd" id="5_fmw3s"]
+[ext_resource type="Script" uid="uid://dtcece7lyqaaa" path="res://scripts/ui/input_manager.gd" id="6_wa3rt"]
+[ext_resource type="PackedScene" uid="uid://csw2g32wfd03q" path="res://scenes/discard.tscn" id="7_wsmqj"]
+[ext_resource type="PackedScene" uid="uid://ddd4e4gfmyeeh" path="res://scenes/turn_manager.tscn" id="8_am30i"]
+[ext_resource type="PackedScene" uid="uid://blkw2nye87d4a" path="res://scenes/deck.tscn" id="9_qym26"]
+[ext_resource type="PackedScene" uid="uid://cuayje03ahsa6" path="res://scenes/card_pile_view.tscn" id="10_l5qh5"]
+
+[sub_resource type="Gradient" id="Gradient_4c57u"]
+colors = PackedColorArray(0.121569, 0, 0, 1, 0, 0, 0.121569, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_272bh"]
+gradient = SubResource("Gradient_4c57u")
+width = 1920
+height = 1080
+fill_from = Vector2(0.188073, 0)
+fill_to = Vector2(0.853211, 0.978593)
+
+[node name="DeckSystem" type="Node2D"]
+
+[node name="Background" type="Sprite2D" parent="."]
+z_index = -10
+position = Vector2(960, 540)
+texture = SubResource("GradientTexture2D_272bh")
+
+[node name="CardManager" type="Node2D" parent="."]
+script = ExtResource("1_ivc5l")
+
+[node name="CardSlot" parent="." instance=ExtResource("2_4egrv")]
+position = Vector2(959, 433)
+scale = Vector2(2.5, 2.5)
+
+[node name="PlayerHand" type="Node2D" parent="."]
+script = ExtResource("3_lo7sj")
+
+[node name="CardDragHandler" type="Node2D" parent="."]
+script = ExtResource("4_pa47b")
+
+[node name="CardPlayHandler" type="Node2D" parent="."]
+script = ExtResource("5_fmw3s")
+
+[node name="InputManager" type="Node2D" parent="."]
+script = ExtResource("6_wa3rt")
+
+[node name="Discard" parent="." instance=ExtResource("7_wsmqj")]
+position = Vector2(1770, 890)
+
+[node name="TurnManager" parent="." instance=ExtResource("8_am30i")]
+metadata/_edit_use_anchors_ = true
+
+[node name="Deck" parent="." instance=ExtResource("9_qym26")]
+position = Vector2(150, 890)
+
+[node name="CardPileView" parent="." instance=ExtResource("10_l5qh5")]
+
+[connection signal="pressed" from="TurnManager" to="CardManager" method="_on_turn_manager_pressed"]
