@@ -11,11 +11,15 @@ var center_screen_x: float
 
 # Called when the node enters the scene tree
 func _ready() -> void:
-	# Cache the horizontal center of the screen
-	center_screen_x = get_viewport().size.x / 2
+	print("player hand instantiated")
+	pass
 
 # Adds a card to the player's hand
 func add_card_to_hand(card: Node2D, speed: float) -> void:
+	# Cache the horizontal center of the screen
+	if not center_screen_x:
+		center_screen_x = get_viewport().size.x / 2
+		
 	if card not in player_hand:
 		# Add new card to the beginning of the hand
 		player_hand.insert(0, card)

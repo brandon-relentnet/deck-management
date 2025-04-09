@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3 uid="uid://bvm1l0sks3mxk"]
+[gd_scene load_steps=12 format=3 uid="uid://bvm1l0sks3mxk"]
 
 [ext_resource type="Script" uid="uid://drh7l2l42f7je" path="res://scripts/core/deck_system.gd" id="1_4egrv"]
 [ext_resource type="Script" uid="uid://l87bixt6uy5b" path="res://scripts/cards/card_manager.gd" id="1_ivc5l"]
@@ -12,23 +12,20 @@
 [ext_resource type="PackedScene" uid="uid://blkw2nye87d4a" path="res://scenes/deck.tscn" id="9_qym26"]
 [ext_resource type="PackedScene" uid="uid://cuayje03ahsa6" path="res://scenes/card_pile_view.tscn" id="10_l5qh5"]
 
-[sub_resource type="Gradient" id="Gradient_4c57u"]
-colors = PackedColorArray(0.121569, 0, 0, 1, 0, 0, 0.121569, 1)
-
-[sub_resource type="GradientTexture2D" id="GradientTexture2D_272bh"]
-gradient = SubResource("Gradient_4c57u")
-width = 1920
-height = 1080
-fill_from = Vector2(0.188073, 0)
-fill_to = Vector2(0.853211, 0.978593)
-
 [node name="DeckSystem" type="Node2D"]
 script = ExtResource("1_4egrv")
 
-[node name="Background" type="Sprite2D" parent="."]
+[node name="Background" type="ColorRect" parent="."]
 z_index = -10
-position = Vector2(960, 540)
-texture = SubResource("GradientTexture2D_272bh")
+custom_minimum_size = Vector2(1920, 1080)
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = 1920.0
+offset_bottom = 1080.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.101961, 0.101961, 0.101961, 1)
 
 [node name="CardManager" type="Node2D" parent="."]
 script = ExtResource("1_ivc5l")

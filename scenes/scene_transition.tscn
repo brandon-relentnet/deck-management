@@ -11,13 +11,22 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_0wykx")
 
-[node name="Container" type="HBoxContainer" parent="."]
+[node name="ColorRect" type="ColorRect" parent="."]
+custom_minimum_size = Vector2(1920, 3000)
 layout_mode = 0
-offset_right = 3840.0
-offset_bottom = 1080.0
+offset_top = -372.0
+offset_right = 1920.0
+offset_bottom = 2628.0
+color = Color(0.101961, 0.101961, 0.101961, 1)
+
+[node name="Container" type="VBoxContainer" parent="."]
+layout_mode = 0
+offset_right = 1920.0
+offset_bottom = 2164.0
+theme_override_constants/separation = 0
 
 [node name="SubViewportContainer1" type="SubViewportContainer" parent="Container"]
-custom_minimum_size = Vector2(1920, 0)
+custom_minimum_size = Vector2(0, 1080)
 layout_mode = 2
 stretch = true
 
@@ -27,7 +36,7 @@ size = Vector2i(1920, 1080)
 render_target_update_mode = 4
 
 [node name="SubViewportContainer2" type="SubViewportContainer" parent="Container"]
-custom_minimum_size = Vector2(1920, 0)
+custom_minimum_size = Vector2(0, 1080)
 layout_mode = 2
 stretch = true
 

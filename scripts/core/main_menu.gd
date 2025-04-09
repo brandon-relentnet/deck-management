@@ -1,6 +1,9 @@
 extends CanvasLayer
 
+const DECK_SYSTEM_SCENE = "res://deck_system.tscn"
 const ANIMATION_DURATION = Utils.DEFAULT_ANIMATION_SPEED
+
+var scene_deck_system = preload(DECK_SYSTEM_SCENE)
 
 func _ready():
 	# Get references to buttons
@@ -24,9 +27,10 @@ func _on_play_pressed():
 	$MarginContainer/VBoxContainer/PlayButton.disabled = true
 	
 	# Use the TransitionManager to transition to the deck system scene
-	await TransitionManager.change_scene("res://deck_system.tscn")
+	await TransitionManager.change_scene(DECK_SYSTEM_SCENE)
 	
-	# At this point, the transition is complete and the new scene is active
+	GameManager.start_game.emit()
+	
 	print("Transition to deck system complete")
 	
 func _on_options_pressed():

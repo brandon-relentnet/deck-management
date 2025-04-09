@@ -20,7 +20,8 @@ var input_manager: Node2D
 
 func _ready() -> void:
 	# Cache common references - using get_node_or_null for safety
-	screen_size = get_viewport_rect().size
+	#print(get_viewport_rect().size.x)
+	# screen_size = get_viewport_rect().size
 	player_hand = get_node_or_null("../PlayerHand")
 	play_handler = get_node_or_null("../CardPlayHandler")
 	input_manager = get_node_or_null("../InputManager")
@@ -46,8 +47,13 @@ func _ready() -> void:
 		else:
 			push_error("InputManager missing expected signal 'left_mouse_button_released'")
 
+func get_screen_size() -> void:
+	screen_size = get_viewport_rect().size
+	print(screen_size)
+
 # Called every frame
 func _process(delta: float) -> void:
+	#print(get_viewport_rect().size)
 	if not card_being_dragged:
 		return
 	

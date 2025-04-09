@@ -2,7 +2,7 @@ extends Control
 
 signal transition_finished
 
-const TRANSITION_DURATION = Utils.DEFAULT_ANIMATION_SPEED * 2
+const TRANSITION_DURATION = Utils.DEFAULT_ANIMATION_SPEED
 
 # References to our viewports
 @onready var viewport_1 = $Container/SubViewportContainer1/SubViewport
@@ -41,16 +41,24 @@ func transition_to_scene(scene_path: String):
 	viewport_2.add_child(new_scene)
 	
 	# Position the container to show the current scene
-	container.position.x = 0
+	container.position.y = 0
 	
-	# Create the sliding animation
+	# Create the sliding animation with multiple steps
 	var tween = create_tween()
 	tween.set_ease(Tween.EASE_OUT)
 	tween.set_trans(Tween.TRANS_CUBIC)
 	
-	# Slide to show the new scene
-	var target_pos = -get_viewport().size.x
-	tween.tween_property(container, "position:x", target_pos, TRANSITION_DURATION)
+	# 1. First nudge right (anticipation)
+	var nudge_amount = get_viewport().size.y * 0.05  # 5% of screen width
+	tween.tween_property(container, "position:y", nudge_amount, TRANSITION_DURATION * 2)
+	
+	# 2. Then slide left beyond target (overshoot)
+	var target_pos = -get_viewport().size.y
+	var overshoot = target_pos * 1.02  # 2% overshoot
+	tween.tween_property(container, "position:y", overshoot, TRANSITION_DURATION)
+	
+	# 3. Finally settle at exact target (ease back)
+	tween.tween_property(container, "position:y", target_pos, TRANSITION_DURATION * 1.5)
 	
 	# Wait for animation to complete
 	await tween.finished

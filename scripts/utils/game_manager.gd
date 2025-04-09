@@ -1,5 +1,7 @@
 extends Node
 
+signal start_game
+
 # Game state variables
 var player_name: String = "Player"
 var difficulty: String = "Normal"
