@@ -64,6 +64,7 @@ static func view_pile(pile_node: Node2D, card_scene: PackedScene, card_ids: Arra
 	# Make sure the view is visible
 	pile_view_container.visible = true
 	pile_node.get_node("../CardPileView/" + pile_name + "PileScroll").visible = true
+	
 # Close the card pile view
 static func close_pile(pile_node: Node2D, is_draw_pile: bool) -> void:
 	var pile_name = "Draw" if is_draw_pile else "Discard"

@@ -1,5 +1,6 @@
-[gd_scene load_steps=13 format=3 uid="uid://bvm1l0sks3mxk"]
+[gd_scene load_steps=14 format=3 uid="uid://bvm1l0sks3mxk"]
 
+[ext_resource type="Script" uid="uid://drh7l2l42f7je" path="res://scripts/core/deck_system.gd" id="1_4egrv"]
 [ext_resource type="Script" uid="uid://l87bixt6uy5b" path="res://scripts/cards/card_manager.gd" id="1_ivc5l"]
 [ext_resource type="PackedScene" uid="uid://brakl80fqtkxy" path="res://scenes/card_slot.tscn" id="2_4egrv"]
 [ext_resource type="Script" uid="uid://d21fogr4y6d5n" path="res://scripts/containers/player_hand.gd" id="3_lo7sj"]
@@ -22,6 +23,7 @@ fill_from = Vector2(0.188073, 0)
 fill_to = Vector2(0.853211, 0.978593)
 
 [node name="DeckSystem" type="Node2D"]
+script = ExtResource("1_4egrv")
 
 [node name="Background" type="Sprite2D" parent="."]
 z_index = -10

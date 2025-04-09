@@ -23,6 +23,7 @@ func _ready():
 	if has_node("RichTextLabel"):
 		$RichTextLabel.z_index = 21
 	
+	print("discard initialized")
 	# Initialize the discard counter display
 	update_discard_display()
 
