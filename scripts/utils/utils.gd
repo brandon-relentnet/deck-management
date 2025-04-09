@@ -9,6 +9,7 @@ const DEFAULT_ANIMATION_SPEED = 0.3
 const CARD_COLLISION_MASK = 1
 const CARD_SLOT_COLLISION_MASK = 2
 const DECK_DISCARD_COLLISION_MASK = 4
+const CURRENT_HAND_DRAW = 5
 
 # Creates and returns a timer with the specified duration
 # This is more convenient than calling get_tree().create_timer() everywhere
@@ -51,7 +52,7 @@ static func animate_node_with_effects(node: Node2D, new_position: Vector2, speed
 static func apply_shake_effect(node: Node2D, offset: Vector2 = Vector2(3, 3), duration: float = 0.05) -> void:
 	var tween = node.create_tween()
 	var original_pos = node.position
-	print("shake effect : [utils.gd]")
+
 	# Quick back-and-forth movement
 	tween.tween_property(node, "position", original_pos + offset, duration)
 	tween.tween_property(node, "position", original_pos, duration)

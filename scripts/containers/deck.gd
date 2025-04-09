@@ -9,7 +9,7 @@ signal deck_shuffled
 # Constants for card creation and animation
 const CARD_SCENE_PATH = "res://scenes/card.tscn"
 const CARD_DRAW_SPEED = Utils.DEFAULT_ANIMATION_SPEED
-const CURRENT_HAND_DRAW = 5
+const CURRENT_HAND_DRAW = Utils.CURRENT_HAND_DRAW
 
 # Deck contents - stored as card IDs that reference the card database
 var player_deck = [
@@ -41,8 +41,8 @@ func _ready() -> void:
 	# Shuffle the deck at the start of the game
 	shuffle_deck()
 	
-	# Draw initial hand
-	draw_hand(CURRENT_HAND_DRAW)
+	## Draw initial hand
+	#draw_hand(CURRENT_HAND_DRAW)
 	
 	# Initialize the deck counter display
 	update_deck_display()

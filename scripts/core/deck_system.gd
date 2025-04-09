@@ -1,6 +1,9 @@
 # Add this script to your Main node in main.tscn
 extends Node2D
 
+const ANIMATION_SPEED: float = Utils.DEFAULT_ANIMATION_SPEED
+const HAND_DRAW = Utils.CURRENT_HAND_DRAW
+
 func _ready():
 	# Initialize the game
 	setup_game()
@@ -13,20 +16,31 @@ func setup_game():
 	# For example, you might load a specific deck based on settings
 	print("Starting game at level: ", GameManager.current_level)
 	
+	# Get references to deck and discard
+	var deck = $Deck
+	var discard = $Discard
+	
+	# Hide the objects initially
+	deck.modulate.a = 0
+	discard.modulate.a = 0
+	
+	await Utils.create_timer(ANIMATION_SPEED * 2)
+	
 	# Optional: Dramatic entrance animation
 	var tween = create_tween()
 	tween.set_ease(Tween.EASE_OUT)
 	tween.set_trans(Tween.TRANS_BACK)
 	
-	# Find and animate your game elements
-	var deck = $Deck
-	var discard = $Discard
-	var hand = $PlayerHand
+	# Animate positions and fade in simultaneously
+	tween.parallel().tween_property(deck, "position", deck.position, ANIMATION_SPEED).from(Vector2(deck.position.x, deck.position.y + 300))
+	tween.parallel().tween_property(deck, "modulate:a", 1.0, ANIMATION_SPEED)
 	
-	# Example animation: Cards flying in from off-screen
-	tween.tween_property(deck, "position", deck.position, 0.5).from(Vector2(deck.position.x - 200, deck.position.y))
-	tween.tween_property(discard, "position", discard.position, 0.5).from(Vector2(discard.position.x + 200, discard.position.y))
-
+	tween.parallel().tween_property(discard, "position", discard.position, ANIMATION_SPEED).from(Vector2(discard.position.x, discard.position.y + 300))
+	tween.parallel().tween_property(discard, "modulate:a", 1.0, ANIMATION_SPEED)
+	
+	await Utils.create_timer(ANIMATION_SPEED)
+	deck.draw_hand(HAND_DRAW)
+	
 func create_back_button():
 	# Create a button to return to main menu
 	var back_button = Button.new()
@@ -61,7 +75,9 @@ func _on_back_button_pressed():
 
 func _confirm_return_to_menu():
 	# Return to main menu
-	get_tree().change_scene_to_file("res://scenes/main_menu.tscn")
+	# Use the TransitionManager to transition to the deck system scene
+	await TransitionManager.change_scene("res://scenes/main_menu.tscn")
+	#get_tree().change_scene_to_file("res://scenes/main_menu.tscn")
 
 # Add this to handle the escape key as well
 func _input(event):

@@ -1,5 +1,7 @@
 extends CanvasLayer
 
+const ANIMATION_DURATION = Utils.DEFAULT_ANIMATION_SPEED
+
 func _ready():
 	# Get references to buttons
 	var play_button = $MarginContainer/VBoxContainer/PlayButton
@@ -18,8 +20,14 @@ func _ready():
 	tween.parallel().tween_property($MarginContainer/VBoxContainer, "modulate:a", 1.0, 0.5).from(0.0)
 
 func _on_play_pressed():
-	# Change to the main game scene
-	get_tree().change_scene_to_file("res://deck_system.tscn")
+	# Disable the button to prevent multiple clicks
+	$MarginContainer/VBoxContainer/PlayButton.disabled = true
+	
+	# Use the TransitionManager to transition to the deck system scene
+	await TransitionManager.change_scene("res://deck_system.tscn")
+	
+	# At this point, the transition is complete and the new scene is active
+	print("Transition to deck system complete")
 	
 func _on_options_pressed():
 	# For now, just print a message
