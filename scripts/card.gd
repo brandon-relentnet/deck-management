@@ -1,18 +1,19 @@
 extends Node2D
-
 # Signals
 signal hovered(card)
 signal hovered_off(card)
-
 # Core properties
 var card_id: String = ""
 var energy: int = 0
 var card_name: String = ""
-
+# Effect properties
+var effects: Array = []
+var effect_amount: int = 0
 # Card state
 var hand_position: Vector2
 var is_being_dragged: bool = false
-
+# Default card front texture path
+var default_card_front = "res://assets/card-front-default.png"
 # Called when the node enters the scene tree
 func _ready() -> void:
 	# Register card signals with the card manager
@@ -23,7 +24,6 @@ func _ready() -> void:
 	# modulate.a = 0.9
 	scale = Vector2(1, 1)
 	z_index = 1
-
 # Set up the card with data from the card database
 func setup_from_id(id: String) -> void:
 	# Get card data from registry
@@ -39,21 +39,43 @@ func setup_from_id(id: String) -> void:
 	card_name = card_data.name
 	energy = card_data.energy
 	
+	if card_data.has("effects"):
+		effects = card_data.effects
+		
+	if card_data.has("effect_amount"):
+		effect_amount = int(card_data.effect_amount)
+
 	# Update visual elements
 	if has_node("NameLabel"):
 		$NameLabel.text = card_name
 	
 	if has_node("EnergyLabel"):
 		$EnergyLabel.text = str(energy)
-
+	
+	# Update card front sprite based on card type
+	if has_node("CardImage"):
+		if card_data.has("card_type"):
+			# Use custom card front if specified
+			$CardImage.texture = load(card_data.card_type)
+		else:
+			# Otherwise use default card front
+			$CardImage.texture = load(default_card_front)
+			
+	# Update card icon if it exists
+	if has_node("CardIcon") and card_data.has("icon"):
+		$CardIcon.texture = load(card_data.icon)
+		$CardIcon.visible = true
+		
+	if has_node("EffectLabel") and card_data.has("effect_amount"):
+		$EffectLabel.text = str(card_data.effect_amount)
+		$EffectLabel.visible = true
+	
 # Mouse entered card area
 func _on_area_2d_mouse_entered() -> void:
 	emit_signal("hovered", self)
-
 # Mouse exited card area
 func _on_area_2d_mouse_exited() -> void:
 	emit_signal("hovered_off", self)
-
 # Input event in card area
 func _on_area_2d_input_event(_viewport, event, _shape_idx):
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
@@ -64,3 +86,9 @@ func _on_area_2d_input_event(_viewport, event, _shape_idx):
 			if turn_manager.player_energy >= energy:
 				get_node("/root/Main/CardManager").start_drag(self)
 				is_being_dragged = true
+
+func get_effects() -> Array:
+	return get_effects()
+
+func get_effect_amount() -> int:
+	return effect_amount

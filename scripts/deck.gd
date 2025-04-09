@@ -10,14 +10,15 @@ const CURRENT_HAND_DRAW = 5
 
 # Deck contents - stored as card IDs that reference the card database
 var player_deck = [
-	"knight_1", "knight_2", "knight_3",
-	"knight_1", "knight_2", "knight_3",
-	"knight_1", "knight_2", "knight_3",
-	"knight_1", "knight_2", "knight_3",
-	"knight_1", "knight_2", "knight_3",
-	"knight_1", "knight_2", "knight_3",
-	"mage_3", "mage_3", "mage_3",
-	"mage_3", "mage_3", "mage_3",
+	"power_1", "power_1", "power_1",
+	"skill_1", "skill_1", "skill_1",
+	"skill_2", "skill_2", "skill_2",
+	"temp_1", "temp_1", "temp_1",
+	"core_1", "core_1", "core_1",
+	"power_1", "power_1", "power_1",
+	"skill_1", "skill_1", "skill_1",
+	"temp_1", "temp_1", "temp_1",
+	"core_1", "core_1", "core_1",
 ]
 
 # Load the card scene resource
@@ -134,7 +135,7 @@ func move_discard_to_draw() -> void:
 		add_child(card_visual)
 		
 		# Setup visual
-		card_visual.texture = load("res://assets/red-card-back.png")
+		card_visual.texture = load("res://assets/card-back-default.png")
 		card_visual.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 		card_visual.global_position = discard_position
 		card_visual.z_index = -1

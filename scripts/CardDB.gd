@@ -10,29 +10,64 @@ var card_registry = {
 		"id": "knight_1",
 		"name": "Knight",
 		"energy": 1,
-		"icon": "res://assets/knight_icon.png",
 		"effects": []
 	},
 	"knight_2": {
 		"id": "knight_2",
 		"name": "Knight+",
 		"energy": 2,
-		"icon": "res://assets/knight_icon.png", 
 		"effects": []
 	},
 	"knight_3": {
 		"id": "knight_3",
 		"name": "Knight++",
 		"energy": 3,
-		"icon": "res://assets/knight_icon.png",
 		"effects": []
 	},
 	"mage_3": {
-	"id": "mage_3",
-	"name": "Mage",
-	"energy": 3,
-	"icon": "res://assets/mage_icon.png",
-	"effects": ["deal_damage", "draw_card"]
+		"id": "mage_3",
+		"name": "Mage",
+		"energy": 3,
+		"effects": ["deal_damage", "draw_card"]
+	},
+	"power_1": {
+		"id": "power_1",
+		"name": "Power",
+		"energy": 1,
+		"card_type": "res://assets/card-front-power.png",
+		"effects": ["deal_damage", "draw_card"]
+	},
+	"skill_1": {
+		"id": "skill_1",
+		"name": "Draw",
+		"energy": 1,
+		"icon": "res://assets/card-icon-draw.png",
+		"card_type": "res://assets/card-front-skill.png",
+		"effect_amount": "2",
+		"effects": ["draw_card"]
+	},
+	"skill_2": {
+		"id": "skill_2",
+		"name": "Draw+",
+		"energy": 2,
+		"icon": "res://assets/card-icon-draw.png",
+		"card_type": "res://assets/card-front-skill.png",
+		"effect_amount": "4",
+		"effects": ["draw_card"]
+	},
+	"core_1": {
+		"id": "core_1",
+		"name": "Core",
+		"energy": 1,
+		"card_type": "res://assets/card-front-core.png",
+		"effects": ["deal_damage", "draw_card"]
+	},
+	"temp_1": {
+		"id": "temp_1",
+		"name": "Temp",
+		"energy": 1,
+		"card_type": "res://assets/card-front-temp.png",
+		"effects": ["deal_damage", "draw_card"]
 	},
 	# Add more card definitions here as you expand your game
 }
