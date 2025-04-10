@@ -31,13 +31,10 @@ func init(cm: Node2D, tm: Node) -> void:
 
 # Called when the node enters the scene tree
 func _ready() -> void:
-	# No need to look for CardManager here anymore, as we're using the injected reference
-	# Just connect the input event and set up visual properties
-	$Area2D.input_event.connect(_on_area_2d_input_event)
-	
+	pass
 	# Set up initial visual properties
-	scale = Vector2(1, 1)
-	z_index = 1
+	#scale = Vector2(1, 1)
+	#z_index = 1
 
 # Set up the card with data from the card database
 func setup_from_id(id: String) -> void:
@@ -87,7 +84,6 @@ func setup_from_id(id: String) -> void:
 
 # Mouse entered card area
 func _on_area_2d_mouse_entered() -> void:
-	print("hovered")
 	emit_signal("hovered", self)
 
 # Mouse exited card area
@@ -96,9 +92,7 @@ func _on_area_2d_mouse_exited() -> void:
 
 # Input event in card area
 func _on_area_2d_input_event(_viewport, event, _shape_idx) -> void:
-	print("area 2d covered")
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
-		print("start drag")
 		# Use the injected turn_manager reference instead of trying to find it
 		if not turn_manager:
 			return
