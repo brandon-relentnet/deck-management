@@ -50,7 +50,7 @@ func _input(event: InputEvent) -> void:
 	# Early return if this isn't a left mouse button event
 	if not (event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT):
 		return
-	
+
 	if event.pressed:
 		emit_signal("left_mouse_button_clicked")
 		process_click()

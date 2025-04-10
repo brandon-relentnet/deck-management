@@ -1,19 +1,18 @@
 extends CanvasLayer
 
 const DECK_SYSTEM_SCENE = "res://deck_system.tscn"
+const SETTINGS_SCENE = "res://scenes/settings.tscn"
 const ANIMATION_DURATION = Utils.DEFAULT_ANIMATION_SPEED
-
-var scene_deck_system = preload(DECK_SYSTEM_SCENE)
 
 func _ready():
 	# Get references to buttons
 	var play_button = $MarginContainer/VBoxContainer/PlayButton
-	var options_button = $MarginContainer/VBoxContainer/OptionsButton
+	var options_button = $MarginContainer/VBoxContainer/SettingsButton
 	var quit_button = $MarginContainer/VBoxContainer/QuitButton
 	
 	# Connect button signals
 	play_button.pressed.connect(_on_play_pressed)
-	options_button.pressed.connect(_on_options_pressed)
+	options_button.pressed.connect(_on_settings_pressed)
 	quit_button.pressed.connect(_on_quit_pressed)
 
 	# Optional: Add a subtle animation to the menu
@@ -33,10 +32,15 @@ func _on_play_pressed():
 	
 	print("Transition to deck system complete")
 	
-func _on_options_pressed():
-	# For now, just print a message
-	print("Options menu (not implemented)")
-	# Load an options menu scene here in the future
+func _on_settings_pressed():
+	# Disable the button to prevent multiple clicks
+	$MarginContainer/VBoxContainer/SettingsButton.disabled = true
+	
+	# Use the TransitionManager to transition to the settings scene
+	await TransitionManager.change_scene(SETTINGS_SCENE)
+	
+	#GameManager.start_game.emit()
+
 	
 func _on_quit_pressed():
 	# Quit the game

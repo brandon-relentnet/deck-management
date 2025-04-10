@@ -8,6 +8,7 @@
 size = Vector2(160, 240)
 
 [node name="Card" type="Node2D"]
+z_index = -1
 position = Vector2(150, 890)
 script = ExtResource("1_rjlel")
 
@@ -16,13 +17,6 @@ texture_filter = 1
 position = Vector2(0.00012207, 6.10352e-05)
 scale = Vector2(2.5, 2.5)
 texture = ExtResource("2_6u4wf")
-
-[node name="Area2D" type="Area2D" parent="."]
-z_index = 2
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
-z_index = 4
-shape = SubResource("RectangleShape2D_rjlel")
 
 [node name="EnergyLabel" type="RichTextLabel" parent="."]
 offset_left = 37.0
@@ -65,6 +59,13 @@ theme_override_font_sizes/normal_font_size = 52
 text = "2"
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="Area2D" type="Area2D" parent="."]
+z_index = 4
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+z_index = 1000
+shape = SubResource("RectangleShape2D_rjlel")
 
 [connection signal="mouse_entered" from="Area2D" to="." method="_on_area_2d_mouse_entered"]
 [connection signal="mouse_exited" from="Area2D" to="." method="_on_area_2d_mouse_exited"]

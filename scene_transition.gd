@@ -83,7 +83,6 @@ func transition_to_scene(scene_path: String):
 		# Wait for animation to complete
 		await tween.finished
 		
-	
 	# Remove scenes from viewports after animation completes
 	if viewport_1.get_child_count() > 0:
 		viewport_1.remove_child(viewport_1.get_child(0))

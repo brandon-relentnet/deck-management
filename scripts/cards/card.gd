@@ -87,6 +87,7 @@ func setup_from_id(id: String) -> void:
 
 # Mouse entered card area
 func _on_area_2d_mouse_entered() -> void:
+	print("hovered")
 	emit_signal("hovered", self)
 
 # Mouse exited card area
@@ -95,7 +96,9 @@ func _on_area_2d_mouse_exited() -> void:
 
 # Input event in card area
 func _on_area_2d_input_event(_viewport, event, _shape_idx) -> void:
+	print("area 2d covered")
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+		print("start drag")
 		# Use the injected turn_manager reference instead of trying to find it
 		if not turn_manager:
 			return
